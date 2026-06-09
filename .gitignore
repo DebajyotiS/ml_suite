@@ -1,0 +1,89 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+*.egg
+
+# Virtual environments
+.venv
+.env
+venv/
+env/
+
+# Distribution / packaging
+.Python
+pip-wheel-metadata/
+share/python-wheels/
+MANIFEST
+
+# uv
+.uv/
+uv.lock
+
+# Type checking
+.mypy_cache/
+.pytype/
+.pyre/
+pyrightconfig.json
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# PyTorch / ML artefacts
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+wandb/
+mlruns/
+lightning_logs/
+outputs/
+checkpoints/
+
+# Hydra
+outputs/
+multirun/
+.hydra/
+
+# Data (opt in explicitly instead)
+data/
+datasets/
+*.h5
+*.hdf5
+*.npz
+*.npy
+*.parquet
+*.arrow
+*.csv
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.orig
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
