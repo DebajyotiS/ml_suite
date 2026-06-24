@@ -1,32 +1,9 @@
+"""Tests for ml_suite.models.unet.conditioning (ConditioningBuilder)."""
+
 import pytest
 import torch
 
-from ml_suite.models.unet.conditioning import (
-    SinusoidalTimeEmbedding,
-    TimeEmbeddingMLP,
-    ConditioningBuilder,
-)
-
-
-def test_sinusoidal_time_embedding_shapes():
-    emb = SinusoidalTimeEmbedding(7)
-    t = torch.arange(4)
-
-    assert emb(t).shape == (4, 7)
-    assert emb(t[:, None]).shape == (4, 7)
-
-
-def test_sinusoidal_time_embedding_rejects_bad_shape():
-    emb = SinusoidalTimeEmbedding(8)
-
-    with pytest.raises(ValueError, match="time"):
-        emb(torch.randn(2, 3))
-
-
-@pytest.mark.parametrize("embedding_type", ["sinusoidal", "learned"])
-def test_time_embedding_mlp_shapes(embedding_type):
-    mlp = TimeEmbeddingMLP(condition_dim=16, embedding_type=embedding_type)
-    assert mlp(torch.arange(4)).shape == (4, 16)
+from ml_suite.models.unet.conditioning import ConditioningBuilder
 
 
 def test_conditioning_builder_time_only():

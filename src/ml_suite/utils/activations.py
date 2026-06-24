@@ -1,8 +1,9 @@
+"""Activation function factory."""
+
 import torch.nn as nn
 
 
-def get_activation(activation: str):
-    # Returns the activation function corresponding to the given string.
+def get_activation(activation: str) -> nn.Module:
     match activation.lower():
         case "relu":
             return nn.ReLU()

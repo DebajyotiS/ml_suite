@@ -7,7 +7,7 @@ from torch import nn
 
 from .pooling import TokenPooling
 from .types import PoolingMode
-from ...utils.torch_utils import get_activation
+from ...utils.activations import get_activation
 
 
 def make_head_mlp(

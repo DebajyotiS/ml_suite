@@ -5,114 +5,12 @@ import torch
 
 from ml_suite.models.transformer.conditioning import (
     ConditionTokenProjector,
-    SinusoidalTimeEmbedding,
-    TimeEmbeddingMLP,
     TransformerConditioningBuilder,
 )
 
 
 # ---------------------------------------------------------------------------
-# SinusoidalTimeEmbedding
-# ---------------------------------------------------------------------------
-
-
-def test_sinusoidal_time_embedding_output_shape_1d():
-    """1D time tensor (batch,) should produce (batch, embedding_dim)."""
-    emb = SinusoidalTimeEmbedding(embedding_dim=16)
-    time = torch.rand(4)
-    out = emb(time)
-    assert out.shape == (4, 16)
-
-
-def test_sinusoidal_time_embedding_output_shape_2d():
-    """2D time tensor (batch, 1) should be squeezed before embedding."""
-    emb = SinusoidalTimeEmbedding(embedding_dim=16)
-    time = torch.rand(4, 1)
-    out = emb(time)
-    assert out.shape == (4, 16)
-
-
-def test_sinusoidal_time_embedding_rejects_wrong_rank():
-    """2D time tensor with more than 1 column must be rejected."""
-    emb = SinusoidalTimeEmbedding(embedding_dim=16)
-    time = torch.rand(4, 2)
-    with pytest.raises(ValueError, match="must have shape"):
-        emb(time)
-
-
-def test_sinusoidal_time_embedding_rejects_non_positive_embedding_dim():
-    """Non-positive embedding_dim must be rejected."""
-    with pytest.raises(ValueError, match="embedding_dim must be positive"):
-        SinusoidalTimeEmbedding(embedding_dim=0)
-
-
-def test_sinusoidal_time_embedding_odd_embedding_dim():
-    """Odd embedding dimensions should be handled via zero-padding."""
-    emb = SinusoidalTimeEmbedding(embedding_dim=9)
-    time = torch.rand(4)
-    out = emb(time)
-    assert out.shape == (4, 9)
-
-
-def test_sinusoidal_time_embedding_output_is_float():
-    """Output should always be float regardless of input dtype."""
-    emb = SinusoidalTimeEmbedding(embedding_dim=16)
-    time = torch.arange(4).float()
-    out = emb(time)
-    assert out.dtype == torch.float32
-
-
-# ---------------------------------------------------------------------------
-# TimeEmbeddingMLP
-# ---------------------------------------------------------------------------
-
-
-def test_time_embedding_mlp_sinusoidal_output_shape():
-    """Sinusoidal TimeEmbeddingMLP should produce (batch, embedding_dim)."""
-    mlp = TimeEmbeddingMLP(embedding_dim=16, embedding_type="sinusoidal")
-    time = torch.rand(4)
-    out = mlp(time)
-    assert out.shape == (4, 16)
-
-
-def test_time_embedding_mlp_learned_output_shape_1d():
-    """Learned TimeEmbeddingMLP with (batch,) time should produce (batch, embedding_dim)."""
-    mlp = TimeEmbeddingMLP(embedding_dim=16, embedding_type="learned")
-    time = torch.rand(4)
-    out = mlp(time)
-    assert out.shape == (4, 16)
-
-
-def test_time_embedding_mlp_learned_output_shape_2d():
-    """Learned TimeEmbeddingMLP with (batch, 1) time should produce (batch, embedding_dim)."""
-    mlp = TimeEmbeddingMLP(embedding_dim=16, embedding_type="learned")
-    time = torch.rand(4, 1)
-    out = mlp(time)
-    assert out.shape == (4, 16)
-
-
-def test_time_embedding_mlp_learned_rejects_wrong_rank():
-    """Learned MLP with 2D time tensor with more than 1 column must be rejected."""
-    mlp = TimeEmbeddingMLP(embedding_dim=16, embedding_type="learned")
-    time = torch.rand(4, 2)
-    with pytest.raises(ValueError, match="must have shape"):
-        mlp(time)
-
-
-def test_time_embedding_mlp_rejects_invalid_embedding_type():
-    """Unsupported embedding_type must be rejected."""
-    with pytest.raises(ValueError, match="Unsupported embedding_type"):
-        TimeEmbeddingMLP(embedding_dim=16, embedding_type="fourier")  # type: ignore[arg-type]
-
-
-def test_time_embedding_mlp_rejects_non_positive_embedding_dim():
-    """Non-positive embedding_dim must be rejected."""
-    with pytest.raises(ValueError, match="embedding_dim must be positive"):
-        TimeEmbeddingMLP(embedding_dim=0)
-
-
-# ---------------------------------------------------------------------------
-# TransformerConditioningBuilder — construction and has_conditioning
+# TransformerConditioningBuilder : construction and has_conditioning
 # ---------------------------------------------------------------------------
 
 
@@ -171,7 +69,7 @@ def test_conditioning_builder_rejects_non_positive_global_context_dim():
 
 
 # ---------------------------------------------------------------------------
-# TransformerConditioningBuilder — forward pass
+# TransformerConditioningBuilder : forward pass
 # ---------------------------------------------------------------------------
 
 
@@ -186,20 +84,18 @@ def test_conditioning_builder_no_conditioning_returns_zeros():
 def test_conditioning_builder_time_conditioning_output_shape():
     """Time-conditioned builder should return (batch, embedding_dim)."""
     builder = TransformerConditioningBuilder(embedding_dim=16, time_conditioning=True)
-    time = torch.rand(2)
-    out = builder(batch_size=2, device=torch.device("cpu"), dtype=torch.float32, time=time)
+    out = builder(batch_size=2, device=torch.device("cpu"), dtype=torch.float32, time=torch.rand(2))
     assert out.shape == (2, 16)
 
 
 def test_conditioning_builder_class_conditioning_output_shape():
     """Class-conditioned builder should return (batch, embedding_dim)."""
     builder = TransformerConditioningBuilder(embedding_dim=16, num_classes=10)
-    labels = torch.randint(0, 10, (2,))
     out = builder(
         batch_size=2,
         device=torch.device("cpu"),
         dtype=torch.float32,
-        class_labels=labels,
+        class_labels=torch.randint(0, 10, (2,)),
     )
     assert out.shape == (2, 16)
 
@@ -207,12 +103,11 @@ def test_conditioning_builder_class_conditioning_output_shape():
 def test_conditioning_builder_global_context_output_shape():
     """Global-context-conditioned builder should return (batch, embedding_dim)."""
     builder = TransformerConditioningBuilder(embedding_dim=16, global_context_dim=8)
-    ctx = torch.randn(2, 8)
     out = builder(
         batch_size=2,
         device=torch.device("cpu"),
         dtype=torch.float32,
-        global_context=ctx,
+        global_context=torch.randn(2, 8),
     )
     assert out.shape == (2, 16)
 
@@ -313,16 +208,14 @@ def test_conditioning_builder_rejects_time_batch_mismatch():
 def test_condition_token_projector_output_shape_single_token():
     """Default single-token projection should produce (batch, 1, embedding_dim)."""
     proj = ConditionTokenProjector(context_dim=8, embedding_dim=16)
-    ctx = torch.randn(2, 8)
-    out = proj(ctx)
+    out = proj(torch.randn(2, 8))
     assert out.shape == (2, 1, 16)
 
 
 def test_condition_token_projector_output_shape_multi_token():
     """Multi-token projection should produce (batch, num_tokens, embedding_dim)."""
     proj = ConditionTokenProjector(context_dim=8, embedding_dim=16, num_tokens=4)
-    ctx = torch.randn(2, 8)
-    out = proj(ctx)
+    out = proj(torch.randn(2, 8))
     assert out.shape == (2, 4, 16)
 
 
@@ -347,14 +240,12 @@ def test_condition_token_projector_rejects_non_positive_num_tokens():
 def test_condition_token_projector_rejects_wrong_rank():
     """Non-2D context must be rejected."""
     proj = ConditionTokenProjector(context_dim=8, embedding_dim=16)
-    ctx = torch.randn(2, 4, 8)
     with pytest.raises(ValueError, match="must have shape"):
-        proj(ctx)
+        proj(torch.randn(2, 4, 8))
 
 
 def test_condition_token_projector_rejects_wrong_context_dim():
     """Context with incorrect feature dimension must be rejected."""
     proj = ConditionTokenProjector(context_dim=8, embedding_dim=16)
-    ctx = torch.randn(2, 12)
     with pytest.raises(ValueError, match="must have shape"):
-        proj(ctx)
+        proj(torch.randn(2, 12))

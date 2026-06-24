@@ -67,7 +67,7 @@ def test_feedforward_rejects_invalid_dropout():
 
 
 # ---------------------------------------------------------------------------
-# TransformerBlock — self-attention only
+# TransformerBlock : self-attention only
 # ---------------------------------------------------------------------------
 
 
@@ -138,7 +138,7 @@ def test_transformer_block_rejects_non_positive_mlp_ratio():
 
 
 # ---------------------------------------------------------------------------
-# TransformerBlock — cross-attention
+# TransformerBlock : cross-attention
 # ---------------------------------------------------------------------------
 
 

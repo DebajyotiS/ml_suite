@@ -10,7 +10,7 @@ from ml_suite.models.transformer.attention import (
 
 
 # ---------------------------------------------------------------------------
-# MultiHeadSelfAttention — construction
+# MultiHeadSelfAttention : construction
 # ---------------------------------------------------------------------------
 
 
@@ -73,7 +73,7 @@ def test_self_attention_none_encoding_has_no_rope():
 
 
 # ---------------------------------------------------------------------------
-# MultiHeadSelfAttention — forward
+# MultiHeadSelfAttention : forward
 # ---------------------------------------------------------------------------
 
 
@@ -154,7 +154,7 @@ def test_self_attention_various_shapes(batch, tokens, dim, heads):
 
 
 # ---------------------------------------------------------------------------
-# MultiHeadCrossAttention — construction
+# MultiHeadCrossAttention : construction
 # ---------------------------------------------------------------------------
 
 
@@ -193,7 +193,7 @@ def test_cross_attention_rejects_non_divisible_query_dim():
 
 
 # ---------------------------------------------------------------------------
-# MultiHeadCrossAttention — forward
+# MultiHeadCrossAttention : forward
 # ---------------------------------------------------------------------------
 
 

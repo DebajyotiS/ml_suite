@@ -10,7 +10,7 @@ from ml_suite.models.transformer.attention import (
     MultiHeadSelfAttention,
 )
 from ml_suite.models.transformer.types import NormType, PositionalEncodingMode
-from ml_suite.utils.torch_utils import get_activation
+from ml_suite.utils.activations import get_activation
 
 
 def build_norm(norm_type: NormType, embedding_dim: int) -> nn.Module:

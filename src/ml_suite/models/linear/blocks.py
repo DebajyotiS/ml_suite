@@ -1,9 +1,13 @@
+"""Linear transformation primitives and MLP stacks."""
+
 from __future__ import annotations
-from dataclasses import dataclass
+
+from typing import List, Literal
+
 import torch
 import torch.nn as nn
-from typing import List, Literal
-from ml_suite.utils.torch_utils import get_activation
+
+from ml_suite.utils.activations import get_activation
 
 
 class LinearBlock(nn.Module):
@@ -77,19 +81,6 @@ class LinearBlock(nn.Module):
         self.activation_fn = get_activation(activation)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor | None = None) -> torch.Tensor:
-        """Processes the input tensor by applying context conditioning and linear projections.
-
-        Args:
-            x: Input feature tensor of shape (..., input_dim).
-            context: Optional conditioning tensor of shape (..., context_dim).
-                Required if `context_dim > 0`.
-
-        Returns:
-            Processed output tensor of shape (..., output_dim).
-
-        Raises:
-            ValueError: If a context tensor is required but not provided.
-        """
         if self.has_context and context is None:
             raise ValueError("Context tensor is required but not provided.")
 
@@ -106,16 +97,12 @@ class LinearBlock(nn.Module):
                     shift = self.film_shift(context)
                     x = x * (scale + 1) + shift
                 case "cross_attn":
-                    # Reshape for multihead attention: (Sequence, Batch, Features)
-                    # Treating x as Query, and context as Key/Value
                     projected_context = self.context_proj(context)
-
                     x_shape = x.shape
                     x_flat = x.view(-1, x_shape[-1]).unsqueeze(0)
                     context_flat = projected_context.view(
                         -1, projected_context.shape[-1]
                     ).unsqueeze(0)
-
                     attn_output, _ = self.cross_attn(x_flat, context_flat, context_flat)
                     x = attn_output.squeeze(0).view(x_shape)
 
@@ -136,11 +123,11 @@ class LinearBlock(nn.Module):
 
         if self.has_context:
             if self.context_injection == "concat":
-                expr = f"Linear(concat(x, context))"
+                expr = "Linear(concat(x, context))"
             elif self.context_injection == "film":
-                expr = f"Linear(x * (scale + 1) + shift)"
+                expr = "Linear(x * (scale + 1) + shift)"
             elif self.context_injection == "cross_attn":
-                expr = f"Linear(CrossAttention(x, context))"
+                expr = "Linear(CrossAttention(x, context))"
             else:
                 expr = f"Linear(x {'+' if self.context_injection == 'add' else '*'} proj(context))"
         else:
@@ -151,9 +138,6 @@ class LinearBlock(nn.Module):
 
 class MLP(nn.Module):
     """A Multi-Layer Perceptron network composed of sequential LinearBlock primitives.
-
-    This block constructs deep fully-connected pipelines with optional feature conditioning
-    distributed across all layer transformations.
 
     Args:
         input_dim: Feature dimension entering the first network layer.
@@ -167,11 +151,6 @@ class MLP(nn.Module):
         activation_list: Explicit list of activation names for each layer.
             Must contain exactly `num_layers` elements.
         do_residual: If True, blocks with matching input and output sizes use residual connections.
-
-    Raises:
-        ValueError: If `num_layers` is less than 1.
-        ValueError: If `hidden_layers` length is not equal to `num_layers - 1`.
-        ValueError: If `activation_list` length is not equal to `num_layers`.
     """
 
     def __init__(
@@ -212,10 +191,7 @@ class MLP(nn.Module):
         for i in range(num_layers):
             in_dim = input_dim if i == 0 else layers[i - 1]
             out_dim = layers[i] if i < num_layers - 1 else hidden_dim
-
-            # Residual connections can only be applied if dimensions align perfectly
             block_residual = do_residual and (in_dim == out_dim)
-
             block = LinearBlock(
                 input_dim=in_dim,
                 output_dim=out_dim,
@@ -227,15 +203,6 @@ class MLP(nn.Module):
             self.blocks.append(block)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor | None = None) -> torch.Tensor:
-        """Executes sequential transformations down the multi-layer block stack.
-
-        Args:
-            x: Input feature tensor of shape (..., input_dim).
-            context: Optional conditioning context tensor of shape (..., context_dim).
-
-        Returns:
-            Processed output tensor of shape (..., hidden_dim).
-        """
         for block in self.blocks:
             x = block(x, context)
         return x
@@ -257,61 +224,3 @@ class MLP(nn.Module):
         for i, block in enumerate(self.blocks):
             lines.append(f"        [{i}] └── {block}")
         return "\n".join(lines)
-
-
-@dataclass
-class VADState:
-    mu: torch.Tensor
-    var: torch.Tensor
-
-    @staticmethod
-    def from_tensor(mean: torch.Tensor) -> VADState:
-        return VADState(mu=mean, var=torch.zeros_like(mean))
-
-    def __add__(self, other: VADState) -> VADState:
-        if not isinstance(other, VADState):
-            raise ValueError("Can only add another VADState instance.")
-        new_mu = self.mu + other.mu
-        new_var = self.var + other.var
-        return VADState(mu=new_mu, var=new_var)
-
-
-class LinearVADInference(nn.Module):
-    """Small mlp for inferring per layer adaptive (input dependent) dropout scale"""
-
-    def __init__(
-        self,
-        input_dim: int,
-        output_dim: int,
-    ) -> None:
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, output_dim),
-            nn.ReLU(),
-            nn.Linear(output_dim, output_dim),
-            nn.ReLU(),
-        )
-
-    def forward(self, data: torch.Tensor):
-        return self.net(data)
-
-
-class VADLinearBlock(nn.Module):
-    def __init__(
-        self,
-        input_dim: int,
-        output_dim: int,
-        context_dim: int = 0,
-        context_injection: Literal["concat", "add", "multiply", "film", "cross_attn"] = "concat",
-        activation: str = "silu",
-        do_residual: bool = False,
-        p: float = 0.5,
-    ) -> None:
-        super().__init__()
-        self.vad_inference = LinearVADInference(input_dim, output_dim)
-        self.p = p
-
-    def forward(self, x: VADState, context: torch.Tensor | None = None) -> VADState:
-        raise NotImplementedError(
-            "VADLinearBlock forward pass is not implemented yet. This is a placeholder for future implementation."
-        )

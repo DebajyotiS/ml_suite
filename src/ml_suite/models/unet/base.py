@@ -6,7 +6,7 @@ import torch
 from torch import nn
 
 from ml_suite.models.convolution import ConvBlock, ConditionedConvBlock
-from ml_suite.utils.torch_utils import get_activation
+from ml_suite.utils.activations import get_activation
 
 from .attention import SpatialAttentionBlock
 from .stages import UNetStage, UNetUpStage

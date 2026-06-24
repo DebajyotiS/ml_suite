@@ -26,7 +26,7 @@ def test_make_head_mlp_single_layer_is_linear():
 
 
 def test_make_head_mlp_single_layer_output_shape():
-    """Single-layer head should map (batch, tokens, input) → (batch, tokens, output)."""
+    """Single-layer head should map (batch, tokens, input) -> (batch, tokens, output)."""
     mlp = make_head_mlp(input_dim=16, output_dim=4)
     x = torch.randn(2, 8, 16)
     assert mlp(x).shape == (2, 8, 4)
@@ -81,7 +81,7 @@ def test_make_head_mlp_rejects_non_positive_hidden_dim():
 
 
 def test_tokenwise_head_output_shape():
-    """TokenwiseHead should map (batch, tokens, embed) → (batch, tokens, output)."""
+    """TokenwiseHead should map (batch, tokens, embed) -> (batch, tokens, output)."""
     head = TokenwiseHead(embedding_dim=16, output_dim=4)
     x = torch.randn(2, 8, 16)
     assert head(x).shape == (2, 8, 4)
@@ -101,7 +101,7 @@ def test_tokenwise_head_multi_layer():
 
 @pytest.mark.parametrize("pooling", ["mean", "max", "cls", "last"])
 def test_pooled_head_output_shape(pooling):
-    """PooledHead should map (batch, tokens, embed) → (batch, output)."""
+    """PooledHead should map (batch, tokens, embed) -> (batch, output)."""
     head = PooledHead(embedding_dim=16, output_dim=4, pooling=pooling)
     x = torch.randn(2, 8, 16)
     assert head(x).shape == (2, 4)

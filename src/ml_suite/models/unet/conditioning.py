@@ -1,94 +1,12 @@
 """Global conditioning modules for U-Nets."""
 
-import math
-
 import torch
 from torch import nn
-from torch.nn import functional as F
 
+from ml_suite.utils.conditioning import SinusoidalTimeEmbedding, TimeEmbeddingMLP
 from .types import TimeEmbeddingType
 
-
-class SinusoidalTimeEmbedding(nn.Module):
-    """Maps scalar times of shape ``(B,)`` or ``(B, 1)`` to sinusoidal vectors."""
-
-    def __init__(self, embedding_dim: int) -> None:
-        super().__init__()
-        if embedding_dim <= 0:
-            raise ValueError(f"embedding_dim must be positive. Got {embedding_dim}.")
-        self.embedding_dim = embedding_dim
-
-    def forward(self, time: torch.Tensor) -> torch.Tensor:
-        if time.ndim == 2 and time.shape[1] == 1:
-            time = time[:, 0]
-        if time.ndim != 1:
-            raise ValueError(f"time must have shape (batch,) or (batch, 1). Got {time.shape}.")
-
-        half_dim = self.embedding_dim // 2
-        if half_dim == 0:
-            return time[:, None].float()
-
-        exponent = -math.log(10_000.0) * torch.arange(
-            half_dim,
-            device=time.device,
-            dtype=torch.float32,
-        )
-        exponent = exponent / max(half_dim - 1, 1)
-        frequencies = torch.exp(exponent)
-        args = time.float()[:, None] * frequencies[None, :]
-        embedding = torch.cat([torch.sin(args), torch.cos(args)], dim=-1)
-
-        if self.embedding_dim % 2 == 1:
-            embedding = F.pad(embedding, (0, 1))
-
-        return embedding
-
-
-class TimeEmbeddingMLP(nn.Module):
-    """Maps scalar time values to the shared global conditioning dimension."""
-
-    def __init__(
-        self,
-        condition_dim: int,
-        embedding_type: TimeEmbeddingType = "sinusoidal",
-        hidden_mult: int = 4,
-    ) -> None:
-        super().__init__()
-        if condition_dim <= 0:
-            raise ValueError(f"condition_dim must be positive. Got {condition_dim}.")
-        if embedding_type not in ("sinusoidal", "learned"):
-            raise ValueError(
-                f"embedding_type must be 'sinusoidal' or 'learned'. Got {embedding_type}."
-            )
-
-        self.condition_dim = condition_dim
-        self.embedding_type = embedding_type
-        if embedding_type == "sinusoidal":
-            self.time_embedding = SinusoidalTimeEmbedding(condition_dim)
-            mlp_input_dim = condition_dim
-        else:
-            self.time_embedding = None
-            mlp_input_dim = 1
-
-        hidden_dim = hidden_mult * condition_dim
-        self.mlp = nn.Sequential(
-            nn.Linear(mlp_input_dim, hidden_dim),
-            nn.SiLU(),
-            nn.Linear(hidden_dim, condition_dim),
-        )
-
-    def forward(self, time: torch.Tensor) -> torch.Tensor:
-        if self.embedding_type == "sinusoidal":
-            assert self.time_embedding is not None
-            emb = self.time_embedding(time)
-        else:
-            if time.ndim == 1:
-                emb = time[:, None].float()
-            elif time.ndim == 2 and time.shape[1] == 1:
-                emb = time.float()
-            else:
-                raise ValueError(f"time must have shape (batch,) or (batch, 1). Got {time.shape}.")
-        return self.mlp(emb)
+__all__ = ["SinusoidalTimeEmbedding", "TimeEmbeddingMLP", "ConditioningBuilder"]
 
 
 class ConditioningBuilder(nn.Module):

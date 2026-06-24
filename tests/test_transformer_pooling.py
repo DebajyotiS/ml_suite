@@ -69,7 +69,7 @@ def test_mean_pooling_with_mask_ignores_padding():
     x = torch.ones(1, 4, 4)
     mask = torch.tensor([[True, True, False, False]])
     out = pool(x, mask=mask)
-    # Two valid tokens of all-ones → mean should still be all-ones
+    # Two valid tokens of all-ones -> mean should still be all-ones
     assert torch.allclose(out, torch.ones(1, 4))
 
 
