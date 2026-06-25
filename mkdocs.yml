@@ -1,0 +1,74 @@
+site_name: ml_suite
+site_description: Reusable dimension-agnostic deep learning building blocks for generative modelling.
+repo_url: https://github.com/DebajyotiS/ml_suite
+repo_name: DebajyotiS/ml_suite
+
+theme:
+  name: material
+  logo: assets/ml_suite_rainbow.png
+  favicon: assets/ml_suite_rainbow.png
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.sections
+    - navigation.top
+    - navigation.indexes
+    - search.highlight
+    - search.suggest
+    - toc.follow
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            separate_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            members_order: source
+            merge_init_into_class: true
+            show_if_no_docstring: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - API Reference:
+    - Linear: api/linear.md
+    - Convolution: api/convolution.md
+    - U-Net: api/unet.md
+    - Transformer:
+      - Models: api/transformer/models.md
+      - Primitives: api/transformer/primitives.md
+      - Presets: api/transformer/presets.md
+    - Utilities: api/utils.md

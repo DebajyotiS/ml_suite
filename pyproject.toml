@@ -24,6 +24,7 @@ dependencies = [
 dev = [
     "ruff>=0.15.15",
     "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
     "ipykernel>=6.29.0",
 ]
 
@@ -44,3 +45,10 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[dependency-groups]
+dev = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.6",
+    "mkdocstrings-python>=2.0.5",
+]
