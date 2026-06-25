@@ -6,9 +6,10 @@
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.12%2B-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
-[![Tests](https://github.com/DebajyotiS/generative_models/actions/workflows/tests.yml/badge.svg)](https://github.com/DebajyotiS/generative_models/actions/workflows/tests.yml)
-[![Build](https://github.com/DebajyotiS/generative_models/actions/workflows/build.yml/badge.svg)](https://github.com/DebajyotiS/generative_models/actions/workflows/build.yml)
-[![Coverage](https://raw.githubusercontent.com/DebajyotiS/generative_models/coverage-data/badge.svg)](https://github.com/DebajyotiS/generative_models/actions/workflows/tests.yml)
+[![Tests](https://github.com/DebajyotiS/ml_suite/actions/workflows/tests.yml/badge.svg)](https://github.com/DebajyotiS/ml_suite/actions/workflows/tests.yml)
+[![Build](https://github.com/DebajyotiS/ml_suite/actions/workflows/build.yml/badge.svg)](https://github.com/DebajyotiS/ml_suite/actions/workflows/build.yml)
+[![Coverage](https://raw.githubusercontent.com/DebajyotiS/ml_suite/coverage-data/badge.svg)](https://github.com/DebajyotiS/ml_suite/actions/workflows/tests.yml)
+[![Docs](https://img.shields.io/badge/docs-online-blue?logo=readthedocs&logoColor=white)](https://DebajyotiS.github.io/ml_suite/)
 
 A PyTorch library of reusable, dimension-agnostic deep learning building blocks for generative modelling research. It supplies composable primitives such as linear blocks, convolution stacks, U-Nets, and token-centric transformers with a consistent API across 1D, 2D, and 3D data.
 
