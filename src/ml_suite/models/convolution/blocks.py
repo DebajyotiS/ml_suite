@@ -9,8 +9,9 @@ from ml_suite.utils.activations import get_activation
 
 
 NormType = Literal["batch", "group", "layer"] | None
-DownsampleMode = Literal["stride", "pool"]
+DownsampleMode = Literal["stride", "maxpool", "avgpool"]
 GlobalPoolMode = Literal["avg", "max", "cat_avg_max"]
+ConvType = Literal["standard", "separable"]
 
 
 class ConvBlock(nn.Module):
@@ -46,7 +47,11 @@ class ConvBlock(nn.Module):
                 "Residual connection requires input_channels to equal output_channels."
             )
 
-        conv_mappings = {1: nn.Conv1d, 2: nn.Conv2d, 3: nn.Conv3d}
+        conv_mappings: dict[int, type[nn.Conv1d] | type[nn.Conv2d] | type[nn.Conv3d]] = {
+            1: nn.Conv1d,
+            2: nn.Conv2d,
+            3: nn.Conv3d,
+        }
         self.conv_dim = conv_dim
         self.conv = conv_mappings[conv_dim](
             in_channels=input_channels,
@@ -179,6 +184,157 @@ class ConditionedConvBlock(ConvBlock):
         return self.activation_fn(out)
 
 
+class SeparableConvBlock(nn.Module):
+    """Depthwise separable convolution block (depthwise conv + pointwise conv).
+
+    Reduces FLOPs by roughly k² relative to a full ConvBlock of the same shape.
+    The depthwise conv handles spatial mixing; the pointwise 1x1 handles channel
+    mixing. Norm and activation are applied after the pointwise step, matching
+    the ConvBlock operation order.
+    """
+
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        conv_dim: int = 2,
+        kernel_size: int = 3,
+        stride: int = 1,
+        padding: int = 1,
+        activation: str = "silu",
+        norm_type: NormType = "batch",
+        num_groups: int = 32,
+        do_residual: bool = False,
+    ) -> None:
+        super().__init__()
+
+        if input_channels <= 0:
+            raise ValueError(f"input_channels must be positive. Got {input_channels}.")
+        if output_channels <= 0:
+            raise ValueError(f"output_channels must be positive. Got {output_channels}.")
+        if conv_dim not in (1, 2, 3):
+            raise ValueError(f"Unsupported conv_dim: {conv_dim}. Choose from 1, 2, or 3.")
+        if do_residual and input_channels != output_channels:
+            raise ValueError(
+                "Residual connection requires input_channels to equal output_channels."
+            )
+
+        conv_mappings: dict[int, type[nn.Conv1d] | type[nn.Conv2d] | type[nn.Conv3d]] = {
+            1: nn.Conv1d,
+            2: nn.Conv2d,
+            3: nn.Conv3d,
+        }
+        ConvNd = conv_mappings[conv_dim]
+
+        self.conv_dim = conv_dim
+        self.input_channels = input_channels
+        self.output_channels = output_channels
+        self.do_residual = do_residual
+
+        self.dw_conv = ConvNd(
+            input_channels,
+            input_channels,
+            kernel_size,
+            stride=stride,
+            padding=padding,
+            groups=input_channels,
+        )
+        self.pw_conv = ConvNd(input_channels, output_channels, 1)
+        self.norm = ConvBlock._build_norm(conv_dim, output_channels, norm_type, num_groups)
+        self.activation_fn = get_activation(activation)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        out = self.dw_conv(x)
+        out = self.pw_conv(out)
+        if self.norm is not None:
+            out = self.norm(out)
+        if self.do_residual:
+            if out.shape != x.shape:
+                raise ValueError(
+                    f"Residual connection shape mismatch: input {x.shape} vs output {out.shape}."
+                )
+            out = x + out
+        return self.activation_fn(out)
+
+    def __repr__(self) -> str:
+        norm_name = self.norm.__class__.__name__ if self.norm else "None"
+        return (
+            f"SeparableConvBlock(input_channels={self.input_channels}, "
+            f"output_channels={self.output_channels}, "
+            f"conv_dim={self.conv_dim}, "
+            f"kernel_size={self.dw_conv.kernel_size}, "
+            f"stride={self.dw_conv.stride}, "
+            f"norm={norm_name}, "
+            f"activation={self.activation_fn.__class__.__name__}, "
+            f"do_residual={self.do_residual})"
+        )
+
+    def __str__(self) -> str:
+        expr = (
+            f"DW-Conv{self.conv_dim}D({self.input_channels}, k={self.dw_conv.kernel_size})"
+            f" → PW({self.input_channels}->{self.output_channels})"
+        )
+        if self.norm is not None:
+            expr = f"{self.norm.__class__.__name__}({expr})"
+        if self.do_residual:
+            expr = f"x + {expr}"
+        return f"{self.activation_fn.__class__.__name__}({expr})"
+
+
+class SeparableConditionedConvBlock(SeparableConvBlock):
+    """SeparableConvBlock with FiLM conditioning.
+
+    The context vector ``(batch, context_dim)`` is projected into per-channel
+    scale and shift applied after the pointwise conv and norm. Zero-initialised
+    projection ensures the block starts as a plain SeparableConvBlock.
+    """
+
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        context_dim: int,
+        **kwargs,
+    ) -> None:
+        if context_dim <= 0:
+            raise ValueError(f"context_dim must be positive. Got {context_dim}.")
+        super().__init__(input_channels=input_channels, output_channels=output_channels, **kwargs)
+        self.context_dim = context_dim
+        self.context_projection = nn.Linear(context_dim, 2 * output_channels)
+        nn.init.zeros_(self.context_projection.weight)
+        nn.init.zeros_(self.context_projection.bias)
+
+    def forward(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
+        if context.ndim != 2:
+            raise ValueError(f"context must have shape (batch, context_dim). Got {context.shape}.")
+        if context.shape[0] != x.shape[0]:
+            raise ValueError(
+                f"context batch size ({context.shape[0]}) must match input batch size "
+                f"({x.shape[0]})."
+            )
+        if context.shape[1] != self.context_dim:
+            raise ValueError(
+                f"context feature dimension must be {self.context_dim}. Got {context.shape[1]}."
+            )
+
+        out = self.dw_conv(x)
+        out = self.pw_conv(out)
+        if self.norm is not None:
+            out = self.norm(out)
+
+        scale, shift = self.context_projection(context).chunk(2, dim=1)
+        view_shape = (x.shape[0], self.output_channels) + (1,) * len(x.shape[2:])
+        out = out * (1.0 + scale.view(view_shape)) + shift.view(view_shape)
+
+        if self.do_residual:
+            if out.shape != x.shape:
+                raise ValueError(
+                    f"Residual connection shape mismatch: input {x.shape} vs output {out.shape}."
+                )
+            out = x + out
+        return self.activation_fn(out)
+
+
 class ConvNet(nn.Module):
     """A flexible 1D, 2D, or 3D convolutional backbone or classifier."""
 
@@ -194,10 +350,17 @@ class ConvNet(nn.Module):
         num_classes: int | None = None,
         activation: str = "silu",
         num_groups: int = 32,
+        conv_type: ConvType = "standard",
     ) -> None:
         super().__init__()
         self._validate_init_args(
-            conv_dim, in_channels, stage_channels, downsample_mode, global_pool_mode, num_classes
+            conv_dim,
+            in_channels,
+            stage_channels,
+            downsample_mode,
+            global_pool_mode,
+            num_classes,
+            conv_type,
         )
         self.conv_dim = conv_dim
         self.in_channels = in_channels
@@ -208,11 +371,13 @@ class ConvNet(nn.Module):
         self.num_classes = num_classes
         self.activation = activation
         self.num_groups = num_groups
+        self.conv_type = conv_type
         self.blocks_per_stage = self._resolve_blocks_per_stage(
             blocks_per_stage, len(self.stage_channels)
         )
 
-        self.stem = ConvBlock(
+        stem_cls = SeparableConvBlock if conv_type == "separable" else ConvBlock
+        self.stem = stem_cls(
             in_channels,
             self.stage_channels[0],
             conv_dim=conv_dim,
@@ -231,6 +396,7 @@ class ConvNet(nn.Module):
         downsample_mode: str,
         global_pool_mode: str,
         num_classes: int | None,
+        conv_type: str,
     ) -> None:
         if conv_dim not in (1, 2, 3):
             raise ValueError(f"conv_dim must be 1, 2, or 3. Got {conv_dim}.")
@@ -240,14 +406,18 @@ class ConvNet(nn.Module):
             raise ValueError("stage_channels must contain at least one stage definition.")
         if any(ch <= 0 for ch in stage_channels):
             raise ValueError(f"All stage channels must be positive. Got {stage_channels}.")
-        if downsample_mode not in ("stride", "pool"):
-            raise ValueError(f"downsample_mode must be 'stride' or 'pool'. Got {downsample_mode}.")
+        if downsample_mode not in ("stride", "maxpool", "avgpool"):
+            raise ValueError(
+                f"downsample_mode must be 'stride', 'maxpool', or 'avgpool'. Got {downsample_mode}."
+            )
         if global_pool_mode not in ("avg", "max", "cat_avg_max"):
             raise ValueError(
                 f"global_pool_mode must be 'avg', 'max', or 'cat_avg_max'. Got {global_pool_mode}."
             )
         if num_classes is not None and num_classes <= 0:
             raise ValueError(f"num_classes must be positive or None. Got {num_classes}.")
+        if conv_type not in ("standard", "separable"):
+            raise ValueError(f"conv_type must be 'standard' or 'separable'. Got {conv_type!r}.")
 
     @staticmethod
     def _resolve_blocks_per_stage(
@@ -274,7 +444,8 @@ class ConvNet(nn.Module):
         stride: int,
         do_residual: bool,
     ) -> nn.Module:
-        return ConvBlock(
+        block_cls = SeparableConvBlock if self.conv_type == "separable" else ConvBlock
+        return block_cls(
             input_channels=input_channels,
             output_channels=output_channels,
             conv_dim=self.conv_dim,
@@ -287,10 +458,13 @@ class ConvNet(nn.Module):
             do_residual=do_residual,
         )
 
-    def _make_pool(self) -> nn.Module:
-        return {1: nn.MaxPool1d, 2: nn.MaxPool2d, 3: nn.MaxPool3d}[self.conv_dim](
-            kernel_size=2, stride=2
-        )
+    def _make_pool(self, pool_mode: Literal["max", "avg"]) -> nn.Module:
+        pool_mappings = {
+            1: {"max": nn.MaxPool1d, "avg": nn.AvgPool1d},
+            2: {"max": nn.MaxPool2d, "avg": nn.AvgPool2d},
+            3: {"max": nn.MaxPool3d, "avg": nn.AvgPool3d},
+        }
+        return pool_mappings[self.conv_dim][pool_mode](kernel_size=2, stride=2)
 
     def _build_stages(self) -> nn.ModuleList:
         stages = nn.ModuleList()
@@ -303,11 +477,16 @@ class ConvNet(nn.Module):
                     stage_modules.append(
                         self._make_conv_block(current_channels, target_channels, 2, False)
                     )
-                elif is_transition and self.downsample_mode == "pool":
+                elif is_transition and self.downsample_mode == "maxpool":
                     stage_modules.append(
                         self._make_conv_block(current_channels, target_channels, 1, False)
                     )
-                    stage_modules.append(self._make_pool())
+                    stage_modules.append(self._make_pool("max"))
+                elif is_transition and self.downsample_mode == "avgpool":
+                    stage_modules.append(
+                        self._make_conv_block(current_channels, target_channels, 1, False)
+                    )
+                    stage_modules.append(self._make_pool("avg"))
                 else:
                     block_in = target_channels if block_idx > 0 else current_channels
                     stage_modules.append(
@@ -377,7 +556,11 @@ class ConvNet(nn.Module):
         def process_block(name: str, module: nn.Module) -> None:
             nonlocal current_rf, current_stride
 
-            if isinstance(module, ConvBlock):
+            if isinstance(module, SeparableConvBlock):
+                kernel_size = module.dw_conv.kernel_size[0]
+                stride = module.dw_conv.stride[0]
+
+            elif isinstance(module, ConvBlock):
                 kernel_size = module.conv.kernel_size[0]
                 stride = module.conv.stride[0]
 
@@ -411,6 +594,7 @@ class ConvNet(nn.Module):
             f"stage_channels={self.stage_channels}, "
             f"blocks_per_stage={self.blocks_per_stage}, "
             f"downsample_mode='{self.downsample_mode}', "
+            f"conv_type='{self.conv_type}', "
             f"norm_type='{self.norm_type}', "
             f"global_pool_mode='{self.global_pool_mode}', "
             f"num_classes={self.num_classes}, "
@@ -453,6 +637,7 @@ class ConditionedConvNet(ConvNet):
         num_classes: int | None = None,
         activation: str = "silu",
         num_groups: int = 32,
+        conv_type: ConvType = "standard",
     ) -> None:
         if context_dim <= 0:
             raise ValueError(f"context_dim must be positive. Got {context_dim}.")
@@ -468,6 +653,7 @@ class ConditionedConvNet(ConvNet):
             num_classes=num_classes,
             activation=activation,
             num_groups=num_groups,
+            conv_type=conv_type,
         )
 
     def _make_conv_block(
@@ -477,7 +663,10 @@ class ConditionedConvNet(ConvNet):
         stride: int,
         do_residual: bool,
     ) -> nn.Module:
-        return ConditionedConvBlock(
+        block_cls = (
+            SeparableConditionedConvBlock if self.conv_type == "separable" else ConditionedConvBlock
+        )
+        return block_cls(
             input_channels=input_channels,
             output_channels=output_channels,
             context_dim=self.context_dim,
@@ -495,7 +684,7 @@ class ConditionedConvNet(ConvNet):
         out = self.stem(x)
         for stage in self.stages:
             for module in stage:
-                if isinstance(module, ConditionedConvBlock):
+                if isinstance(module, (ConditionedConvBlock, SeparableConditionedConvBlock)):
                     out = module(out, context)
                 else:
                     out = module(out)

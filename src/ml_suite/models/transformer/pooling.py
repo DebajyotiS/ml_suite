@@ -62,7 +62,7 @@ class TokenPooling(nn.Module):
             return masked.max(dim=1).values
 
         if self.mode == "attention":
-            scores = self.attention_score(tokens).squeeze(-1) / (tokens.dtype)  # type: ignore[union-attr]
+            scores = self.attention_score(tokens).squeeze(-1)  # type: ignore[union-attr]
             if mask is not None:
                 scores = scores.masked_fill(~mask, torch.finfo(tokens.dtype).min)
             weights = torch.softmax(scores, dim=1).unsqueeze(-1)

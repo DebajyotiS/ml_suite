@@ -161,7 +161,17 @@ class SpatialAttentionBlock(nn.Module):
         x: torch.Tensor,
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
+        spatial_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """
+        Args:
+            x: ``(B, C, *spatial_dims)``
+            cross_context: ``(B, context_tokens, cross_attention_dim)``
+            cross_context_mask: ``(B, context_tokens)`` bool, True = valid token
+            spatial_mask: ``(B, *spatial_dims)`` bool, True = visible patch.
+                Passed as key_padding_mask to self-attention, e.g. for masked
+                patch prediction.
+        """
         if x.ndim < 3:
             raise ValueError("Expected x with shape (B, C, *spatial_dims).")
 
@@ -173,6 +183,22 @@ class SpatialAttentionBlock(nn.Module):
         tokens = x.flatten(start_dim=2).transpose(1, 2)
         key_padding_mask = self._get_key_padding_mask(tokens, cross_context, cross_context_mask)
 
+        self_key_padding_mask: torch.Tensor | None = None
+        if spatial_mask is not None:
+            if not self.uses_self_attention:
+                raise ValueError(
+                    "spatial_mask was provided, but this block does not use self-attention."
+                )
+            if spatial_mask.shape != (batch_size, *spatial_shape):
+                raise ValueError(
+                    f"spatial_mask must have shape {(batch_size, *spatial_shape)}. "
+                    f"Got {spatial_mask.shape}."
+                )
+            if spatial_mask.dtype != torch.bool:
+                raise ValueError("spatial_mask must be a boolean tensor.")
+            # Flatten spatial dims; invert because PyTorch uses True = ignore.
+            self_key_padding_mask = ~spatial_mask.flatten(start_dim=1)
+
         if self.uses_self_attention:
             assert self.self_norm is not None
             assert self.self_input_projection is not None
@@ -180,7 +206,9 @@ class SpatialAttentionBlock(nn.Module):
             assert self.self_output_projection is not None
             residual = tokens
             h = self.self_input_projection(self.self_norm(tokens))
-            h, _ = self.self_attention(h, h, h, need_weights=False)
+            h, _ = self.self_attention(
+                h, h, h, key_padding_mask=self_key_padding_mask, need_weights=False
+            )
             tokens = residual + self.self_output_projection(h)
 
         if self.uses_cross_attention:

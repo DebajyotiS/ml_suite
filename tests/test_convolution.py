@@ -9,6 +9,8 @@ from ml_suite.models.convolution import (
     ConditionedConvNet,
     ConvBlock,
     ConvNet,
+    SeparableConvBlock,
+    SeparableConditionedConvBlock,
 )
 
 
@@ -320,11 +322,11 @@ def test_conditioned_conv_block_residual_shape_mismatch_raises_error_at_forward(
         (3, (2, 3, 32, 64, 64)),
     ],
 )
-@pytest.mark.parametrize("downsample_mode", ["stride", "pool"])
+@pytest.mark.parametrize("downsample_mode", ["stride", "maxpool", "avgpool"])
 def test_conv_net_feature_extraction_shapes(
     dim: int,
     input_shape: tuple[int, ...],
-    downsample_mode: Literal["stride", "pool"],
+    downsample_mode: Literal["stride", "maxpool", "avgpool"],
 ):
     """ConvNet should return spatial features when num_classes=None."""
     stage_channels = [16, 32, 64]
@@ -392,7 +394,7 @@ def test_conv_net_pool_mode_transition_adds_pool_module():
         in_channels=3,
         stage_channels=[16, 32],
         blocks_per_stage=[1, 1],
-        downsample_mode="pool",
+        downsample_mode="maxpool",
     )
 
     assert len(net.stages[0]) == 1
@@ -526,11 +528,11 @@ def test_conv_net_strings():
         (3, (2, 3, 32, 64, 64)),
     ],
 )
-@pytest.mark.parametrize("downsample_mode", ["stride", "pool"])
+@pytest.mark.parametrize("downsample_mode", ["stride", "maxpool", "avgpool"])
 def test_conditioned_conv_net_feature_extraction_shapes(
     dim: int,
     input_shape: tuple[int, ...],
-    downsample_mode: Literal["stride", "pool"],
+    downsample_mode: Literal["stride", "maxpool", "avgpool"],
 ):
     """ConditionedConvNet should return conditioned spatial features when num_classes=None."""
     context_dim = 7
@@ -622,7 +624,7 @@ def test_conditioned_conv_net_pool_mode_contains_pool_modules():
         stage_channels=[16, 32],
         blocks_per_stage=[1, 1],
         context_dim=7,
-        downsample_mode="pool",
+        downsample_mode="maxpool",
     )
 
     assert len(net.stages[0]) == 1
@@ -696,3 +698,195 @@ def test_conditioned_conv_net_strings():
     assert "stage_channels=[16]" in repr_str
     assert "Global Pooling:" in str_str
     assert "Head: Linear" in str_str
+
+
+# ---------------------------------------------------------------------------
+# SeparableConvBlock
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "dim, input_shape",
+    [
+        (1, (2, 8, 32)),
+        (2, (2, 8, 32, 32)),
+        (3, (2, 8, 16, 32, 32)),
+    ],
+)
+def test_separable_conv_block_output_shape(dim: int, input_shape: tuple[int, ...]):
+    """SeparableConvBlock should produce the expected output shape across dimensions."""
+    block = SeparableConvBlock(
+        input_channels=8,
+        output_channels=16,
+        conv_dim=dim,
+        num_groups=4,
+    )
+    out = block(torch.randn(*input_shape))
+    assert out.shape == (input_shape[0], 16) + input_shape[2:]
+
+
+def test_separable_conv_block_stride_halves_spatial():
+    """stride=2 should halve each spatial dimension."""
+    block = SeparableConvBlock(input_channels=8, output_channels=16, conv_dim=2, stride=2)
+    out = block(torch.randn(2, 8, 32, 32))
+    assert out.shape == (2, 16, 16, 16)
+
+
+def test_separable_conv_block_residual():
+    """Residual connection should work when input and output channels match."""
+    block = SeparableConvBlock(
+        input_channels=8,
+        output_channels=8,
+        conv_dim=2,
+        do_residual=True,
+    )
+    x = torch.randn(2, 8, 16, 16)
+    assert block(x).shape == x.shape
+
+
+def test_separable_conv_block_invalid_residual_channel_mismatch():
+    """Residual requires equal input and output channels."""
+    with pytest.raises(ValueError, match="Residual connection requires"):
+        SeparableConvBlock(input_channels=8, output_channels=16, conv_dim=2, do_residual=True)
+
+
+def test_separable_conditioned_conv_block_output_shape():
+    """SeparableConditionedConvBlock should pass FiLM context and preserve shape."""
+    block = SeparableConditionedConvBlock(
+        input_channels=8,
+        output_channels=16,
+        context_dim=5,
+        conv_dim=2,
+        num_groups=4,
+    )
+    x = torch.randn(2, 8, 16, 16)
+    ctx = torch.randn(2, 5)
+    assert block(x, ctx).shape == (2, 16, 16, 16)
+
+
+def test_separable_conditioned_conv_block_film_starts_as_identity():
+    """Zero-initialised FiLM should make the block context-invariant at init."""
+    block = SeparableConditionedConvBlock(
+        input_channels=8,
+        output_channels=8,
+        context_dim=5,
+        conv_dim=2,
+        norm_type=None,
+        do_residual=True,
+    )
+    x = torch.randn(2, 8, 16, 16)
+    out_a = block(x, torch.randn(2, 5))
+    out_b = block(x, torch.randn(2, 5))
+    assert torch.allclose(out_a, out_b, atol=1e-6)
+
+
+# ---------------------------------------------------------------------------
+# conv_type parameter on ConvNet
+# ---------------------------------------------------------------------------
+
+
+def test_conv_net_separable_output_shape():
+    """conv_type='separable' should produce the same output shape as 'standard'."""
+    kwargs = dict(conv_dim=2, in_channels=3, stage_channels=[16, 32], blocks_per_stage=2)
+    x = torch.randn(2, 3, 32, 32)
+    std_out = ConvNet(**kwargs, conv_type="standard")(x)
+    sep_out = ConvNet(**kwargs, conv_type="separable")(x)
+    assert std_out.shape == sep_out.shape
+
+
+def test_conv_net_separable_fewer_params():
+    """Separable ConvNet should have fewer parameters than standard for wide stages."""
+    kwargs = dict(
+        conv_dim=2,
+        in_channels=3,
+        stage_channels=[64, 128],
+        blocks_per_stage=2,
+        num_classes=10,
+    )
+    n_std = sum(p.numel() for p in ConvNet(**kwargs, conv_type="standard").parameters())
+    n_sep = sum(p.numel() for p in ConvNet(**kwargs, conv_type="separable").parameters())
+    assert n_sep < n_std
+
+
+def test_conv_net_separable_uses_separable_blocks():
+    """conv_type='separable' should install SeparableConvBlock in stages."""
+    net = ConvNet(
+        conv_dim=2,
+        in_channels=3,
+        stage_channels=[16, 32],
+        blocks_per_stage=2,
+        conv_type="separable",
+    )
+    for stage in net.stages:
+        for module in stage:
+            if not isinstance(
+                module,
+                (
+                    nn.MaxPool1d,
+                    nn.MaxPool2d,
+                    nn.MaxPool3d,
+                    nn.AvgPool1d,
+                    nn.AvgPool2d,
+                    nn.AvgPool3d,
+                ),
+            ):
+                assert isinstance(module, SeparableConvBlock)
+
+
+def test_conv_net_invalid_conv_type_raises_error():
+    """Invalid conv_type must be rejected at construction."""
+    with pytest.raises(ValueError, match="conv_type must be"):
+        ConvNet(
+            conv_dim=2,
+            in_channels=3,
+            stage_channels=[16],
+            blocks_per_stage=1,
+            conv_type="ghost",  # type: ignore[arg-type]
+        )
+
+
+# ---------------------------------------------------------------------------
+# conv_type parameter on ConditionedConvNet
+# ---------------------------------------------------------------------------
+
+
+def test_conditioned_conv_net_separable_output_shape():
+    """conv_type='separable' ConditionedConvNet should produce the same shape as standard."""
+    kwargs = dict(
+        conv_dim=2,
+        in_channels=3,
+        stage_channels=[16, 32],
+        blocks_per_stage=2,
+        context_dim=7,
+    )
+    x = torch.randn(2, 3, 32, 32)
+    ctx = torch.randn(2, 7)
+    std_out = ConditionedConvNet(**kwargs, conv_type="standard")(x, ctx)
+    sep_out = ConditionedConvNet(**kwargs, conv_type="separable")(x, ctx)
+    assert std_out.shape == sep_out.shape
+
+
+def test_conditioned_conv_net_separable_uses_separable_conditioned_blocks():
+    """conv_type='separable' should install SeparableConditionedConvBlock in stages."""
+    net = ConditionedConvNet(
+        conv_dim=2,
+        in_channels=3,
+        stage_channels=[16, 32],
+        blocks_per_stage=2,
+        context_dim=7,
+        conv_type="separable",
+    )
+    for stage in net.stages:
+        for module in stage:
+            if not isinstance(
+                module,
+                (
+                    nn.MaxPool1d,
+                    nn.MaxPool2d,
+                    nn.MaxPool3d,
+                    nn.AvgPool1d,
+                    nn.AvgPool2d,
+                    nn.AvgPool3d,
+                ),
+            ):
+                assert isinstance(module, SeparableConditionedConvBlock)

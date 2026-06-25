@@ -322,7 +322,7 @@ class PatchTransformerND(nn.Module):
         self,
         input_dim: int,
         in_channels: int,
-        out_channels: int,
+        out_channels: int | None,
         patch_size: int | Sequence[int],
         embedding_dim: int,
         depth: int,
@@ -372,6 +372,8 @@ class PatchTransformerND(nn.Module):
         )
 
         if output_mode == "grid":
+            if out_channels is None:
+                raise ValueError("out_channels is required when output_mode='grid'.")
             self.patch_decoder = PatchDecoderND(
                 input_dim=input_dim,
                 embedding_dim=embedding_dim,
@@ -384,8 +386,12 @@ class PatchTransformerND(nn.Module):
                 output_dim=vector_output_dim,
                 pooling=pooling,
             )
-        else:
-            self.decoder = nn.Identity()
+        else:  # "tokens"
+            self.token_decoder: nn.Module = (
+                TokenwiseHead(embedding_dim=embedding_dim, output_dim=out_channels)
+                if out_channels is not None
+                else nn.Identity()
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         tokens, grid_shape = self.tokenizer(x)
@@ -396,3 +402,4 @@ class PatchTransformerND(nn.Module):
             return self.patch_decoder(tokens, grid_shape=grid_shape)
         if self.output_mode == "vector":
             return self.vector_decoder(tokens)
+        return self.token_decoder(tokens)

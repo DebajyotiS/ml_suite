@@ -58,6 +58,4 @@ class VADLinearBlock(nn.Module):
         self.p = p
 
     def forward(self, x: VADState, context: torch.Tensor | None = None) -> VADState:
-        raise NotImplementedError(
-            "VADLinearBlock forward pass is not implemented yet."
-        )
+        raise NotImplementedError("VADLinearBlock forward pass is not implemented yet.")

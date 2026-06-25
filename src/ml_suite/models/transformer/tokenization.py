@@ -8,7 +8,7 @@ import torch
 from torch import nn
 
 from .heads import make_head_mlp
-from .utils import compute_patch_grid, ensure_tuple, num_tokens_from_grid
+from .utils import compute_patch_grid, ensure_tuple
 
 
 class ContinuousInputTokenizer(nn.Module):
