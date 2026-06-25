@@ -90,6 +90,15 @@ class TokenToTokenTransformer(nn.Module):
         x: torch.Tensor,
         mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Map a token sequence to output tokens of the same length.
+
+        Args:
+            x: Input token tensor of shape (batch, tokens, input_dim).
+            mask: Optional boolean valid-token mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Output tensor of shape (batch, tokens, output_dim).
+        """
         tokens = self.tokenizer(x)
 
         if mask is not None:
@@ -158,6 +167,15 @@ class TokenToVectorTransformer(nn.Module):
         x: torch.Tensor,
         mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Map a token sequence to a single output vector.
+
+        Args:
+            x: Input token tensor of shape (batch, tokens, input_dim).
+            mask: Optional boolean valid-token mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Output vector of shape (batch, output_dim).
+        """
         tokens = self.tokenizer(x)
 
         if mask is not None:
@@ -283,6 +301,26 @@ class ConditionedTokenTransformer(nn.Module):
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Map a conditioned token sequence to output tokens of the same length.
+
+        Global conditioning sources (time, class, context) are projected to embedding_dim, summed,
+        and broadcast-added to all tokens before the transformer stack.
+
+        Args:
+            x: Input token tensor of shape (batch, tokens, input_dim).
+            mask: Optional boolean valid-token mask of shape (batch, tokens). True = valid token.
+            time: Diffusion timestep of shape (batch,). Required when time_conditioning=True.
+            class_labels: Integer class indices of shape (batch,). Required when num_classes is set.
+            global_context: Global context vector of shape (batch, global_context_dim).
+                Required when global_context_dim is set.
+            cross_context: Cross-attention token sequence of shape
+                (batch, context_tokens, cross_attention_dim).
+                Required when cross_attention_dim is set.
+            cross_context_mask: Boolean mask of shape (batch, context_tokens). True = valid token.
+
+        Returns:
+            Output tensor of shape (batch, tokens, output_dim).
+        """
         tokens = self.tokenizer(x)
 
         if mask is not None:
@@ -394,6 +432,19 @@ class PatchTransformerND(nn.Module):
             )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Patchify the input grid, process with the transformer stack, and decode.
+
+        Args:
+            x: Spatial input of shape (batch, in_channels, *spatial). Each spatial dimension
+                must be divisible by the corresponding patch_size entry.
+
+        Returns:
+            Decoded output whose shape depends on output_mode:
+                - 'grid': (batch, out_channels, *spatial)
+                - 'tokens': (batch, num_patches, out_channels) or
+                    (batch, num_patches, embedding_dim) if out_channels is None
+                - 'vector': (batch, vector_output_dim)
+        """
         tokens, grid_shape = self.tokenizer(x)
         tokens = self.absolute_position(tokens)
         tokens = self.stack(tokens)

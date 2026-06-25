@@ -75,6 +75,14 @@ class UNet(BaseUNet):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Run the plain U-Net encoder-decoder forward pass.
+
+        Args:
+            x: Input tensor of shape (batch, in_channels, *spatial).
+
+        Returns:
+            Output tensor of shape (batch, out_channels, *spatial).
+        """
         return self._forward_impl(x)
 
 
@@ -171,6 +179,26 @@ class ConditionedUNet(BaseUNet):
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Run the conditioned U-Net forward pass.
+
+        All enabled global conditioning sources are projected to condition_dim and summed into a
+        single FiLM vector passed to every conditioned convolutional block. Token cross-context
+        is used only by spatial attention blocks.
+
+        Args:
+            x: Input tensor of shape (batch, in_channels, *spatial).
+            time: Diffusion timestep of shape (batch,). Required when time_conditioning=True.
+            class_labels: Integer class indices of shape (batch,). Required when num_classes is set.
+            global_context: Global context vector of shape (batch, global_context_dim).
+                Required when global_context_dim is set.
+            cross_context: Token sequence of shape (batch, tokens, cross_attention_dim).
+                Required when attention_type is 'cross' or 'self_cross'.
+            cross_context_mask: Boolean valid-token mask of shape (batch, tokens).
+                True indicates a valid (non-padded) token.
+
+        Returns:
+            Output tensor of shape (batch, out_channels, *spatial).
+        """
         condition = self.conditioning(
             batch_size=x.shape[0],
             device=x.device,

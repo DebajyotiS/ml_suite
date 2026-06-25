@@ -191,6 +191,7 @@ class BaseUNet(nn.Module):
             raise ValueError("Cross-attention requires at least one attention downsample factor.")
 
     def _build_encoder_pools(self) -> nn.ModuleList:
+        """Build pooling operators used between encoder stages when downsample_mode='pool'."""
         pools = nn.ModuleList()
         if self.downsample_mode == "pool":
             for _ in range(len(self.stage_channels) - 1):
@@ -202,6 +203,12 @@ class BaseUNet(nn.Module):
         downsample_factor: int,
         location: str,
     ) -> bool:
+        """Return True if an attention block should be inserted at this encoder depth and location.
+
+        Args:
+            downsample_factor: The spatial reduction factor at the current stage (e.g. 2, 4, 8).
+            location: One of 'encoder', 'decoder', or 'bottleneck'.
+        """
         if downsample_factor not in self.attention_downsample_factors:
             return False
         if location == "bottleneck":
@@ -218,6 +225,16 @@ class BaseUNet(nn.Module):
         downsample_factor: int,
         location: str,
     ) -> nn.Module | None:
+        """Create a SpatialAttentionBlock for this stage, or None if attention is not required.
+
+        Args:
+            channels: Number of feature channels at this stage.
+            downsample_factor: Spatial reduction factor used to decide whether to insert attention.
+            location: One of 'encoder', 'decoder', or 'bottleneck'.
+
+        Returns:
+            A SpatialAttentionBlock or None.
+        """
         if not self._should_use_attention(downsample_factor, location):
             return None
         return SpatialAttentionBlock(
@@ -230,6 +247,7 @@ class BaseUNet(nn.Module):
         )
 
     def _build_encoder_stages(self) -> nn.ModuleList:
+        """Build all encoder stages, including the bottleneck stage at the deepest level."""
         stages = nn.ModuleList()
         current_channels = self.in_channels
         num_stages = len(self.stage_channels)
@@ -258,6 +276,7 @@ class BaseUNet(nn.Module):
         return stages
 
     def _build_decoder_stages(self) -> nn.ModuleList:
+        """Build all decoder (upsampling) stages from the bottleneck back to input resolution."""
         stages = nn.ModuleList()
         current_channels = self.stage_channels[-1]
         for skip_stage_idx in range(len(self.stage_channels) - 2, -1, -1):
@@ -291,6 +310,16 @@ class BaseUNet(nn.Module):
         cross_context: torch.Tensor | None,
         cross_context_mask: torch.Tensor | None,
     ) -> None:
+        """Validate the cross-attention context tensor and mask against the model configuration.
+
+        Args:
+            batch_size: Expected batch size derived from the primary input.
+            cross_context: Cross-attention token sequence, or None.
+            cross_context_mask: Boolean valid-token mask, or None.
+
+        Raises:
+            ValueError: If cross_context is required but absent, or if shapes are inconsistent.
+        """
         if self.uses_cross_attention and cross_context is None:
             raise ValueError("cross_context must be provided when cross-attention is enabled.")
         if not self.uses_cross_attention and cross_context is not None:
@@ -328,6 +357,24 @@ class BaseUNet(nn.Module):
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Run the full encoder-decoder forward pass.
+
+        Encoder stages collect skip connections; decoder stages upsample and merge them.
+        A pointwise convolution and output activation are applied at the end.
+
+        Args:
+            x: Input spatial tensor of shape (batch, in_channels, *spatial).
+            condition: FiLM conditioning vector of shape (batch, condition_dim).
+                Required when block_cls is a ConditionedConvBlock subclass.
+            cross_context: Cross-attention token sequence of shape
+                (batch, tokens, cross_attention_dim).
+                Required when attention_type is 'cross' or 'self_cross'.
+            cross_context_mask: Boolean valid-token mask of shape (batch, tokens).
+                True indicates a valid (non-padded) token.
+
+        Returns:
+            Output spatial tensor of shape (batch, out_channels, *spatial).
+        """
         validate_spatial_input(x, self.conv_dim, self.in_channels)
         if self.is_conditioned and condition is None:
             raise ValueError("condition is required for conditioned U-Net blocks.")

@@ -16,6 +16,7 @@ class VADState:
 
     @staticmethod
     def from_tensor(mean: torch.Tensor) -> VADState:
+        """Construct a VADState from a mean tensor with variance initialised to zero."""
         return VADState(mu=mean, var=torch.zeros_like(mean))
 
     def __add__(self, other: VADState) -> VADState:
@@ -37,6 +38,14 @@ class LinearVADInference(nn.Module):
         )
 
     def forward(self, data: torch.Tensor) -> torch.Tensor:
+        """Infer per-element adaptive dropout scale.
+
+        Args:
+            data: Input tensor of shape (batch, input_dim).
+
+        Returns:
+            Scale tensor of shape (batch, output_dim).
+        """
         return self.net(data)
 
 

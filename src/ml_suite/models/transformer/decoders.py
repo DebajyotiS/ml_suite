@@ -112,6 +112,17 @@ class QuerySetDecoder(nn.Module):
         )
 
     def forward(self, latent: torch.Tensor) -> torch.Tensor:
+        """Decode a latent vector into a fixed-size set of output tokens.
+
+        Learned query vectors are biased by a projection of the latent before being mapped
+        through the token-wise head to produce the output set.
+
+        Args:
+            latent: Global latent vector of shape (batch, latent_dim).
+
+        Returns:
+            Output token set of shape (batch, num_queries, output_dim).
+        """
         if latent.ndim != 2:
             raise ValueError(f"latent must have shape (batch, latent_dim). Got {latent.shape}.")
 

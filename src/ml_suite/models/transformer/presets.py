@@ -20,7 +20,24 @@ def make_point_cloud_classifier(
     feature_dim: int = 0,
     pooling: PoolingMode = "mean",
 ) -> TokenToClassTransformer:
-    """Create a permutation-invariant point-cloud classifier."""
+    """Create a permutation-invariant point-cloud classifier.
+
+    No positional encoding is applied, so predictions are invariant to point ordering.
+    Each point is treated as a token; global pooling aggregates them before classification.
+
+    Args:
+        point_dim: Spatial dimension of each point (e.g. 3 for XYZ coordinates).
+        num_classes: Number of output classes.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+        feature_dim: Optional per-point feature dimension appended to coordinates.
+            The effective input dimension becomes point_dim + feature_dim.
+        pooling: Pooling strategy applied over tokens before the classification head.
+
+    Returns:
+        A TokenToClassTransformer configured for point-cloud classification.
+    """
     return TokenToClassTransformer(
         input_dim=point_dim + feature_dim,
         num_classes=num_classes,
@@ -40,7 +57,23 @@ def make_point_to_point_model(
     num_heads: int,
     feature_dim: int = 0,
 ) -> TokenToTokenTransformer:
-    """Create a permutation-equivariant point-to-point model."""
+    """Create a permutation-equivariant point-to-point model.
+
+    No positional encoding is applied, so predictions are equivariant to point ordering.
+    Each input point produces one output vector of output_dim features.
+
+    Args:
+        point_dim: Spatial dimension of each input point (e.g. 3 for XYZ).
+        output_dim: Output feature dimension per point.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+        feature_dim: Optional per-point feature dimension appended to coordinates.
+            The effective input dimension becomes point_dim + feature_dim.
+
+    Returns:
+        A TokenToTokenTransformer configured for point-to-point prediction.
+    """
     return TokenToTokenTransformer(
         input_dim=point_dim + feature_dim,
         output_dim=output_dim,
@@ -62,7 +95,27 @@ def make_conditioned_point_to_point_model(
     global_context_dim: int | None = None,
     cross_attention_dim: int | None = None,
 ) -> ConditionedTokenTransformer:
-    """Create a conditional point-to-point model."""
+    """Create a conditional point-to-point model.
+
+    Suitable for score or velocity field estimation in diffusion and flow-matching models
+    operating on point sets. No positional encoding is applied to the point tokens.
+
+    Args:
+        point_dim: Spatial dimension of each input point (e.g. 3 for XYZ).
+        output_dim: Output feature dimension per point.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+        feature_dim: Optional per-point feature dimension appended to coordinates.
+            The effective input dimension becomes point_dim + feature_dim.
+        time_conditioning: If True, accept a diffusion timestep tensor of shape (batch,).
+        global_context_dim: Dimension of an optional global context vector.
+        cross_attention_dim: If set, enable cross-attention with an external token sequence
+            of this feature dimension.
+
+    Returns:
+        A ConditionedTokenTransformer configured for conditioned point-to-point prediction.
+    """
     return ConditionedTokenTransformer(
         input_dim=point_dim + feature_dim,
         output_dim=output_dim,
@@ -85,7 +138,23 @@ def make_sequence_classifier(
     max_length: int,
     pooling: PoolingMode = "mean",
 ) -> TokenToClassTransformer:
-    """Create an ordered sequence classifier."""
+    """Create an ordered sequence classifier.
+
+    Uses RoPE positional encoding so position information is injected inside the attention
+    mechanism rather than as an additive embedding. Suitable for variable-length sequences.
+
+    Args:
+        input_dim: Feature dimension of each input token.
+        num_classes: Number of output classes.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+        max_length: Maximum sequence length. Used to bound RoPE frequency computations.
+        pooling: Pooling strategy applied over tokens before the classification head.
+
+    Returns:
+        A TokenToClassTransformer configured for sequence classification with RoPE.
+    """
     return TokenToClassTransformer(
         input_dim=input_dim,
         num_classes=num_classes,
@@ -107,7 +176,25 @@ def make_patch_grid_model(
     depth: int,
     num_heads: int,
 ) -> PatchTransformerND:
-    """Create a grid-to-grid patch transformer."""
+    """Create a grid-to-grid patch transformer.
+
+    The input dense spatial grid is split into non-overlapping patches, each embedded as a token.
+    After transformer processing, patch tokens are decoded back to a dense spatial grid of the
+    same resolution. Sinusoidal positional encoding is applied to the patch tokens.
+
+    Args:
+        input_dim: Number of spatial dimensions (1, 2, or 3).
+        in_channels: Number of input channels.
+        out_channels: Number of output channels in the reconstructed grid.
+        patch_size: Patch size per spatial dimension. A single int is broadcast to all dimensions.
+            The spatial dimensions of the input must be divisible by this value.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+
+    Returns:
+        A PatchTransformerND configured for grid-to-grid prediction.
+    """
     return PatchTransformerND(
         input_dim=input_dim,
         in_channels=in_channels,
@@ -130,7 +217,25 @@ def make_patch_classifier(
     depth: int,
     num_heads: int,
 ) -> PatchTransformerND:
-    """Create a patch-based classifier for 1D, 2D, or 3D grids."""
+    """Create a patch-based classifier for 1D, 2D, or 3D grids.
+
+    The input dense spatial grid is split into non-overlapping patches, each embedded as a token.
+    After transformer processing, patch tokens are pooled into a single class prediction vector.
+    Sinusoidal positional encoding is applied to the patch tokens.
+
+    Args:
+        input_dim: Number of spatial dimensions (1, 2, or 3).
+        in_channels: Number of input channels.
+        num_classes: Number of output classes.
+        patch_size: Patch size per spatial dimension. A single int is broadcast to all dimensions.
+            The spatial dimensions of the input must be divisible by this value.
+        embedding_dim: Transformer embedding dimension.
+        depth: Number of transformer blocks.
+        num_heads: Number of attention heads per block.
+
+    Returns:
+        A PatchTransformerND configured for patch-based classification.
+    """
     return PatchTransformerND(
         input_dim=input_dim,
         in_channels=in_channels,

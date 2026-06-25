@@ -18,7 +18,22 @@ def make_head_mlp(
     activation: str = "silu",
     dropout: float = 0.0,
 ) -> nn.Module:
-    """Build a small MLP head."""
+    """Build a small MLP head.
+
+    Args:
+        input_dim: Input feature dimension.
+        output_dim: Output feature dimension.
+        hidden_dim: Hidden layer dimension for num_layers > 1. Defaults to input_dim.
+        num_layers: Total number of linear layers. 1 produces a single Linear with no activation.
+        activation: Activation function name applied between hidden layers.
+        dropout: Dropout probability applied after each hidden activation and the final layer.
+
+    Returns:
+        An nn.Module that maps (..., input_dim) to (..., output_dim).
+
+    Raises:
+        ValueError: If input_dim, output_dim, or hidden_dim is non-positive, or num_layers < 1.
+    """
     if input_dim <= 0:
         raise ValueError(f"input_dim must be positive. Got {input_dim}.")
     if output_dim <= 0:
@@ -77,6 +92,14 @@ class TokenwiseHead(nn.Module):
         )
 
     def forward(self, tokens: torch.Tensor) -> torch.Tensor:
+        """Map each token independently to the output dimension.
+
+        Args:
+            tokens: Token tensor of shape (batch, tokens, embedding_dim).
+
+        Returns:
+            Output tensor of shape (batch, tokens, output_dim).
+        """
         return self.net(tokens)
 
 
@@ -109,6 +132,15 @@ class PooledHead(nn.Module):
         tokens: torch.Tensor,
         mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Pool tokens and map the pooled vector to the output dimension.
+
+        Args:
+            tokens: Token tensor of shape (batch, tokens, embedding_dim).
+            mask: Optional boolean valid-token mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Output vector of shape (batch, output_dim).
+        """
         pooled = self.pooling(tokens, mask=mask)
         return self.head(pooled)
 

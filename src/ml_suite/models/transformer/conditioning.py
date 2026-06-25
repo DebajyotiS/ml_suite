@@ -147,6 +147,14 @@ class ConditionTokenProjector(nn.Module):
         self.projection = nn.Linear(context_dim, num_tokens * embedding_dim)
 
     def forward(self, context: torch.Tensor) -> torch.Tensor:
+        """Project a global context vector into one or more condition tokens.
+
+        Args:
+            context: Global context tensor of shape (batch, context_dim).
+
+        Returns:
+            Condition tokens of shape (batch, num_tokens, embedding_dim).
+        """
         if context.ndim != 2 or context.shape[1] != self.context_dim:
             raise ValueError(
                 f"context must have shape (batch, {self.context_dim}). Got {context.shape}."

@@ -14,6 +14,18 @@ from ml_suite.utils.activations import get_activation
 
 
 def build_norm(norm_type: NormType, embedding_dim: int) -> nn.Module:
+    """Instantiate a normalisation layer by type name.
+
+    Args:
+        norm_type: 'layer' for LayerNorm or 'rms' for RMSNorm.
+        embedding_dim: Feature dimension to normalise over.
+
+    Returns:
+        The requested normalisation module.
+
+    Raises:
+        ValueError: If norm_type is not supported.
+    """
     if norm_type == "layer":
         return nn.LayerNorm(embedding_dim)
     if norm_type == "rms":
@@ -49,6 +61,14 @@ class FeedForward(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply the two-layer feed-forward network to tokens.
+
+        Args:
+            x: Token tensor of shape (batch, tokens, embedding_dim).
+
+        Returns:
+            Output tensor of the same shape.
+        """
         return self.net(x)
 
 
@@ -112,7 +132,18 @@ class TransformerBlock(nn.Module):
         context: torch.Tensor | None = None,
         context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Apply the transformer block."""
+        """Apply pre-norm self-attention, optional cross-attention, and feed-forward with residuals.
+
+        Args:
+            x: Token tensor of shape (batch, tokens, embedding_dim).
+            mask: Optional boolean self-attention mask of shape (batch, tokens). True = valid token.
+            context: Cross-attention context of shape (batch, context_tokens, cross_attention_dim).
+                Required when use_cross_attention=True.
+            context_mask: Optional boolean mask of shape (batch, context_tokens). True = valid token.
+
+        Returns:
+            Output tensor of shape (batch, tokens, embedding_dim).
+        """
         x = x + self.self_attention(self.self_norm(x), mask=mask)
 
         if self.use_cross_attention:

@@ -25,6 +25,14 @@ class SinusoidalTimeEmbedding(nn.Module):
         self.register_buffer("frequencies", torch.exp(exponent))
 
     def forward(self, time: torch.Tensor) -> torch.Tensor:
+        """Embed scalar time values into a sinusoidal representation.
+
+        Args:
+            time: Timestep tensor of shape (batch,) or (batch, 1).
+
+        Returns:
+            Sinusoidal embeddings of shape (batch, embedding_dim).
+        """
         if time.ndim == 2 and time.shape[1] == 1:
             time = time[:, 0]
         if time.ndim != 1:
@@ -67,6 +75,14 @@ class TimeEmbeddingMLP(nn.Module):
         )
 
     def forward(self, time: torch.Tensor) -> torch.Tensor:
+        """Map scalar time values to a target-dimensioned embedding vector.
+
+        Args:
+            time: Timestep tensor of shape (batch,) or (batch, 1).
+
+        Returns:
+            Embedding tensor of shape (batch, embedding_dim).
+        """
         if self.embedding_type == "sinusoidal":
             emb = self.time_embedding(time)
         else:

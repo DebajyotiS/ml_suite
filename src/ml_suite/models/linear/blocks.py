@@ -81,6 +81,22 @@ class LinearBlock(nn.Module):
         self.activation_fn = get_activation(activation)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor | None = None) -> torch.Tensor:
+        """Apply context conditioning, linear projection, optional residual, and activation.
+
+        Args:
+            x: Input tensor of shape (..., input_dim).
+            context: Conditioning tensor. Required when context_dim > 0.
+                For 'concat': shape (..., context_dim).
+                For 'add'/'multiply': shape (..., context_dim).
+                For 'film': shape (..., context_dim).
+                For 'cross_attn': shape (..., context_dim).
+
+        Returns:
+            Output tensor of shape (..., output_dim).
+
+        Raises:
+            ValueError: If context_dim > 0 and context is None.
+        """
         if self.has_context and context is None:
             raise ValueError("Context tensor is required but not provided.")
 
@@ -203,6 +219,15 @@ class MLP(nn.Module):
             self.blocks.append(block)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor | None = None) -> torch.Tensor:
+        """Pass x through all LinearBlock layers in sequence.
+
+        Args:
+            x: Input tensor of shape (..., input_dim).
+            context: Optional conditioning tensor passed to every block unchanged.
+
+        Returns:
+            Output tensor of shape (..., hidden_dim).
+        """
         for block in self.blocks:
             x = block(x, context)
         return x

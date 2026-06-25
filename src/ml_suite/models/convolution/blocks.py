@@ -94,6 +94,14 @@ class ConvBlock(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply conv, norm, optional residual, and activation.
+
+        Args:
+            x: Input tensor of shape (batch, input_channels, *spatial).
+
+        Returns:
+            Output tensor of shape (batch, output_channels, *spatial).
+        """
         out = self.conv(x)
         if self.norm is not None:
             out = self.norm(out)
@@ -155,6 +163,15 @@ class ConditionedConvBlock(ConvBlock):
         nn.init.zeros_(self.context_projection.bias)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
+        """Apply conv, norm, FiLM conditioning, optional residual, and activation.
+
+        Args:
+            x: Input tensor of shape (batch, input_channels, *spatial).
+            context: Conditioning vector of shape (batch, context_dim).
+
+        Returns:
+            Output tensor of shape (batch, output_channels, *spatial).
+        """
         if context.ndim != 2:
             raise ValueError(f"context must have shape (batch, context_dim). Got {context.shape}.")
         if context.shape[0] != x.shape[0]:
@@ -244,6 +261,14 @@ class SeparableConvBlock(nn.Module):
         self.activation_fn = get_activation(activation)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Apply depthwise conv, pointwise conv, norm, optional residual, and activation.
+
+        Args:
+            x: Input tensor of shape (batch, input_channels, *spatial).
+
+        Returns:
+            Output tensor of shape (batch, output_channels, *spatial).
+        """
         out = self.dw_conv(x)
         out = self.pw_conv(out)
         if self.norm is not None:
@@ -305,6 +330,15 @@ class SeparableConditionedConvBlock(SeparableConvBlock):
         nn.init.zeros_(self.context_projection.bias)
 
     def forward(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:  # type: ignore[override]
+        """Apply separable conv, norm, FiLM conditioning, optional residual, and activation.
+
+        Args:
+            x: Input tensor of shape (batch, input_channels, *spatial).
+            context: Conditioning vector of shape (batch, context_dim).
+
+        Returns:
+            Output tensor of shape (batch, output_channels, *spatial).
+        """
         if context.ndim != 2:
             raise ValueError(f"context must have shape (batch, context_dim). Got {context.shape}.")
         if context.shape[0] != x.shape[0]:
@@ -530,6 +564,15 @@ class ConvNet(nn.Module):
         return self.head(torch.flatten(out, start_dim=1))
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Run the stem, all stages, and the optional classification head.
+
+        Args:
+            x: Input tensor of shape (batch, in_channels, *spatial).
+
+        Returns:
+            If num_classes is set: logits of shape (batch, num_classes).
+            Otherwise: feature map of shape (batch, stage_channels[-1], *spatial).
+        """
         out = self.stem(x)
         for stage in self.stages:
             for module in stage:
@@ -681,6 +724,16 @@ class ConditionedConvNet(ConvNet):
         )
 
     def forward(self, x: torch.Tensor, context: torch.Tensor) -> torch.Tensor:
+        """Run the FiLM-conditioned stem, all stages, and the optional classification head.
+
+        Args:
+            x: Input tensor of shape (batch, in_channels, *spatial).
+            context: Global conditioning vector of shape (batch, context_dim).
+
+        Returns:
+            If num_classes is set: logits of shape (batch, num_classes).
+            Otherwise: feature map of shape (batch, stage_channels[-1], *spatial).
+        """
         out = self.stem(x)
         for stage in self.stages:
             for module in stage:

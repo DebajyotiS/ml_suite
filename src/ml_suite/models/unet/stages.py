@@ -110,6 +110,18 @@ class UNetStage(nn.Module):
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Apply all conv blocks then the optional spatial attention block.
+
+        Args:
+            x: Feature map of shape (batch, input_channels, *spatial).
+            condition: FiLM vector of shape (batch, condition_dim). Required for conditioned stages.
+            cross_context: Cross-attention token sequence of shape
+                (batch, tokens, cross_attention_dim).
+            cross_context_mask: Boolean mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Feature map of shape (batch, output_channels, *spatial).
+        """
         out = x
         for block in self.blocks:
             if isinstance(block, ConditionedConvBlock):
@@ -230,6 +242,19 @@ class UNetUpStage(nn.Module):
         cross_context: torch.Tensor | None = None,
         cross_context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Upsample x, merge with the skip connection, and apply the decoder stage.
+
+        Args:
+            x: Lower-resolution feature map of shape (batch, input_channels, *spatial).
+            skip: Matching encoder skip tensor of shape (batch, skip_channels, *spatial_skip).
+            condition: FiLM vector of shape (batch, condition_dim). Required for conditioned stages.
+            cross_context: Cross-attention token sequence of shape
+                (batch, tokens, cross_attention_dim).
+            cross_context_mask: Boolean mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Feature map of shape (batch, output_channels, *spatial_skip).
+        """
         if self.upsample_mode == "transpose":
             out = self.upsample(x)
         else:

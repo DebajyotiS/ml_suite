@@ -28,6 +28,14 @@ class LearnedPositionalEmbedding(nn.Module):
         self.embedding = nn.Embedding(max_length, embedding_dim)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Add learned positional embeddings to a token tensor.
+
+        Args:
+            x: Token tensor of shape (batch, tokens, embedding_dim).
+
+        Returns:
+            Tensor of the same shape with positional embeddings added.
+        """
         if x.ndim != 3:
             raise ValueError(f"x must have shape (batch, tokens, dim). Got {x.shape}.")
 
@@ -76,6 +84,14 @@ class SinusoidalPositionalEmbedding(nn.Module):
         return embedding
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Add fixed sinusoidal positional embeddings to a token tensor.
+
+        Args:
+            x: Token tensor of shape (batch, tokens, embedding_dim).
+
+        Returns:
+            Tensor of the same shape with positional embeddings added.
+        """
         if x.ndim != 3:
             raise ValueError(f"x must have shape (batch, tokens, dim). Got {x.shape}.")
 
@@ -113,6 +129,17 @@ class RotaryEmbedding(nn.Module):
         device: torch.device,
         dtype: torch.dtype,
     ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return cosine and sine rotation matrices for a given sequence length.
+
+        Args:
+            seq_len: Number of positions to generate embeddings for.
+            device: Target device for the output tensors.
+            dtype: Target dtype for the output tensors.
+
+        Returns:
+            A pair (cos, sin), each of shape (seq_len, rotary_dim // 2),
+            where rotary_dim is head_dim rounded down to the nearest even number.
+        """
         positions = torch.arange(seq_len, device=device, dtype=torch.float32)
         freqs = torch.einsum("i,j->ij", positions, self.inv_freq.to(device=device))
         cos = freqs.cos().to(dtype=dtype)

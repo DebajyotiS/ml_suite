@@ -144,6 +144,22 @@ class ConditioningBuilder(nn.Module):
         class_labels: torch.Tensor | None = None,
         global_context: torch.Tensor | None = None,
     ) -> torch.Tensor:
+        """Build the combined FiLM conditioning vector.
+
+        All enabled conditioning sources are projected to condition_dim and summed.
+
+        Args:
+            batch_size: Number of samples in the batch.
+            device: Target device for the output tensor.
+            dtype: Target dtype for the output tensor.
+            time: Timestep tensor of shape (batch,). Required when time_conditioning=True.
+            class_labels: Integer class indices of shape (batch,). Required when num_classes is set.
+            global_context: Global context of shape (batch, global_context_dim).
+                Required when global_context_dim is set.
+
+        Returns:
+            Conditioning vector of shape (batch, condition_dim).
+        """
         self.validate_inputs(batch_size, time, class_labels, global_context)
 
         condition = torch.zeros(batch_size, self.condition_dim, device=device, dtype=dtype)

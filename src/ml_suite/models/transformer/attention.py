@@ -137,7 +137,15 @@ class MultiHeadSelfAttention(nn.Module):
         x: torch.Tensor,
         mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Apply self-attention to tokens shaped (batch, tokens, dim)."""
+        """Apply multi-head self-attention to a token tensor.
+
+        Args:
+            x: Token tensor of shape (batch, tokens, embedding_dim).
+            mask: Optional boolean valid-token mask of shape (batch, tokens). True = valid token.
+
+        Returns:
+            Output tensor of shape (batch, tokens, embedding_dim).
+        """
         validate_token_tensor(x)
 
         if x.shape[-1] != self.embedding_dim:
@@ -242,7 +250,17 @@ class MultiHeadCrossAttention(nn.Module):
         context: torch.Tensor,
         context_mask: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        """Apply cross-attention from x to context."""
+        """Apply multi-head cross-attention from query tokens to context tokens.
+
+        Args:
+            x: Query token tensor of shape (batch, query_tokens, query_dim).
+            context: Context token tensor of shape (batch, context_tokens, context_dim).
+            context_mask: Optional boolean mask of shape (batch, context_tokens).
+                True = valid token.
+
+        Returns:
+            Output tensor of shape (batch, query_tokens, query_dim).
+        """
         validate_token_tensor(x)
         validate_token_tensor(context, name="context")
 
