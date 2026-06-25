@@ -4139,6 +4139,9 @@ True = valid token.</p>
 
 </div><hr />
 <h2 id="tokenizers">Tokenizers</h2>
+<blockquote>
+<p><strong>Note on naming:</strong> "Tokenizers" here means the components that convert raw modality inputs into the <code>(B, T, embedding_dim)</code> format the transformer expects — including input projection for continuous features, embedding lookup for discrete IDs, and patch extraction for spatial data. Upstream segmentation (e.g. BPE) is handled outside these classes and is out of scope.</p>
+</blockquote>
 <h3 id="continuousinputtokenizer">ContinuousInputTokenizer</h3>
 
 
