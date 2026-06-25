@@ -23,9 +23,11 @@ theme:
   features:
     - content.code.copy
     - content.code.annotate
+    - navigation.tabs
     - navigation.sections
     - navigation.top
     - navigation.indexes
+    - navigation.path
     - search.highlight
     - search.suggest
     - toc.follow
@@ -63,6 +65,7 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Getting Started: getting-started.md
   - API Reference:
     - Linear: api/linear.md
     - Convolution: api/convolution.md
