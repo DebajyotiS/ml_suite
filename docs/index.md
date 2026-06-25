@@ -6,19 +6,23 @@ Reusable, dimension-agnostic deep learning building blocks for generative modell
 
 ## Where to start
 
+Pick the tab that matches your goal. Each one shows the recommended model and a minimal working example. The API links at the bottom of each tab have the full parameter reference.
+
 === "I want to classify something"
 
-    **ConvNet** for images or signals, **TokenToClassTransformer** for sets and sequences.
+    Use **`ConvNet`** when your input is a spatial grid like images, 1D signals, or 3D volumes. Use **`make_point_cloud_classifier`** when your input is an unordered set of points, since the transformer is permutation-invariant and order does not matter.
+
+    Both return a logit vector of shape `(batch, num_classes)`.
 
     ```python
     from ml_suite.models.convolution import ConvNet
     from ml_suite.models.transformer.presets import make_point_cloud_classifier
 
-    # 2-D image classifier
+    # 2-D image classifier (e.g. CIFAR-10)
     model = ConvNet(conv_dim=2, in_channels=3, stage_channels=[64, 128, 256],
                     blocks_per_stage=2, num_classes=10)
 
-    # Permutation-invariant point-cloud classifier
+    # Permutation-invariant point-cloud classifier (e.g. ModelNet40)
     model = make_point_cloud_classifier(point_dim=3, num_classes=40,
                                         embedding_dim=256, depth=6, num_heads=4)
     ```
@@ -27,30 +31,37 @@ Reusable, dimension-agnostic deep learning building blocks for generative modell
 
 === "I want a diffusion / flow model"
 
-    **ConditionedUNet** for spatial data, **ConditionedTokenTransformer** or the conditioned preset for sets and point clouds.
+    These models learn to predict a denoising direction (DDPM) or a velocity field (flow matching) and require a **time embedding** at every forward pass.
+
+    Use **`ConditionedUNet`** for spatial data with local structure like images or voxels. Use **`make_conditioned_point_to_point_model`** for point sets or sequences where you want a per-token output of the same shape as the input.
 
     ```python
     from ml_suite.models.unet import ConditionedUNet
     from ml_suite.models.transformer.presets import make_conditioned_point_to_point_model
 
-    # Time-conditioned 2-D U-Net (DDPM / EDM style)
+    # Time-conditioned 2-D U-Net (DDPM / EDM style). Output shape matches input.
     model = ConditionedUNet(conv_dim=2, in_channels=3, out_channels=3,
                             stage_channels=[64, 128, 256, 512],
                             time_conditioning=True)
-    out = model(x, time=t)
+    out = model(x, time=t)  # x: (B, 3, H, W), t: (B,)
 
-    # Flow-matching velocity field on point sets
+    # Flow-matching velocity field on point sets. Output shape matches input.
     model = make_conditioned_point_to_point_model(
         point_dim=3, output_dim=3, embedding_dim=128,
         depth=6, num_heads=4, time_conditioning=True)
-    out = model(x, time=t)
+    out = model(x, time=t)  # x: (B, N, 3), t: (B,)
     ```
 
     See: [U-Net](api/unet.md) · [Transformer presets](api/transformer/presets.md)
 
 === "I want a patch / ViT model"
 
-    **PatchTransformerND** handles 1-D, 2-D, and 3-D grids and supports grid reconstruction, token-level output, or a pooled vector.
+    **`PatchTransformerND`** splits a spatial grid into non-overlapping patches, encodes them with a transformer, and can produce different output shapes depending on your task:
+
+    - **Grid reconstruction** (`make_patch_grid_model`): output has the same spatial shape as the input, useful for segmentation or denoising backbones.
+    - **Classification** (`make_patch_classifier`): a single pooled class vector, the standard ViT setup.
+
+    Both work on 1-D, 2-D, and 3-D grids without changing the API.
 
     ```python
     from ml_suite.models.transformer.presets import make_patch_grid_model, make_patch_classifier
@@ -60,7 +71,7 @@ Reusable, dimension-agnostic deep learning building blocks for generative modell
                                   patch_size=16, embedding_dim=256,
                                   depth=12, num_heads=8)
 
-    # ViT classifier
+    # ViT classifier (e.g. ImageNet)
     model = make_patch_classifier(input_dim=2, in_channels=3, num_classes=1000,
                                   patch_size=16, embedding_dim=768,
                                   depth=12, num_heads=12)
@@ -70,7 +81,9 @@ Reusable, dimension-agnostic deep learning building blocks for generative modell
 
 === "I want to build something custom"
 
-    Compose lower-level primitives directly.
+    The preset functions are thin wrappers around composable primitives. If you need a non-standard architecture with mixed modalities, custom conditioning, or unusual head shapes, you can wire the pieces together directly.
+
+    The typical stack is **tokenizer -> transformer -> head**, with optional conditioning injected at the transformer level via FiLM or cross-attention.
 
     ```python
     from ml_suite.models.transformer import (
@@ -82,6 +95,10 @@ Reusable, dimension-agnostic deep learning building blocks for generative modell
     tokenizer = ContinuousInputTokenizer(input_dim=64, embedding_dim=256)
     stack = TransformerStack(embedding_dim=256, depth=6, num_heads=8)
     head = PooledHead(embedding_dim=256, output_dim=10)
+
+    tokens = tokenizer(x)       # (B, N, 256)
+    encoded = stack(tokens)     # (B, N, 256)
+    out = head(encoded)         # (B, 10)
     ```
 
     See: [Transformer primitives](api/transformer/primitives.md) · [Linear](api/linear.md)
