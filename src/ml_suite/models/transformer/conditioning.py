@@ -6,6 +6,7 @@ import torch
 from torch import nn
 
 from ml_suite.utils.conditioning import SinusoidalTimeEmbedding, TimeEmbeddingMLP
+
 from .types import TimeEmbeddingType
 
 __all__ = [

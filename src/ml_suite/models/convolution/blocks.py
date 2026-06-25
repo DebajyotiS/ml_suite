@@ -1,12 +1,12 @@
 """Dimension-agnostic convolutional primitives and ConvNet backbones."""
 
-from typing import Literal, Sequence
+from collections.abc import Sequence
+from typing import Literal
 
 import torch
 from torch import nn
 
 from ml_suite.utils.activations import get_activation
-
 
 NormType = Literal["batch", "group", "layer"] | None
 DownsampleMode = Literal["stride", "maxpool", "avgpool"]

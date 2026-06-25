@@ -7,6 +7,36 @@ All core models operate on token tensors shaped:
 Modalities enter through tokenizers and leave through heads or decoders.
 """
 
+from .attention import MultiHeadCrossAttention, MultiHeadSelfAttention
+from .blocks import FeedForward, TransformerBlock
+from .conditioning import (
+    ConditionTokenProjector,
+    SinusoidalTimeEmbedding,
+    TimeEmbeddingMLP,
+    TransformerConditioningBuilder,
+)
+from .decoders import PatchDecoderND, QuerySetDecoder, TokenDecoder
+from .heads import (
+    ClassificationHead,
+    PooledHead,
+    RegressionHead,
+    TokenwiseHead,
+)
+from .models import (
+    ConditionedTokenTransformer,
+    PatchTransformerND,
+    TokenToClassTransformer,
+    TokenToTokenTransformer,
+    TokenToVectorTransformer,
+)
+from .pooling import TokenPooling
+from .stacks import TransformerStack
+from .tokenization import (
+    ContinuousInputTokenizer,
+    DiscreteTokenTokenizer,
+    PatchTokenizerND,
+    SetTokenizer,
+)
 from .types import (
     AttentionType,
     NormType,
@@ -14,36 +44,6 @@ from .types import (
     PoolingMode,
     PositionalEncodingMode,
     TimeEmbeddingType,
-)
-from .tokenization import (
-    ContinuousInputTokenizer,
-    DiscreteTokenTokenizer,
-    PatchTokenizerND,
-    SetTokenizer,
-)
-from .attention import MultiHeadSelfAttention, MultiHeadCrossAttention
-from .blocks import FeedForward, TransformerBlock
-from .stacks import TransformerStack
-from .conditioning import (
-    SinusoidalTimeEmbedding,
-    TimeEmbeddingMLP,
-    TransformerConditioningBuilder,
-    ConditionTokenProjector,
-)
-from .pooling import TokenPooling
-from .heads import (
-    TokenwiseHead,
-    PooledHead,
-    ClassificationHead,
-    RegressionHead,
-)
-from .decoders import TokenDecoder, PatchDecoderND, QuerySetDecoder
-from .models import (
-    TokenToTokenTransformer,
-    TokenToVectorTransformer,
-    TokenToClassTransformer,
-    ConditionedTokenTransformer,
-    PatchTransformerND,
 )
 
 __all__ = [

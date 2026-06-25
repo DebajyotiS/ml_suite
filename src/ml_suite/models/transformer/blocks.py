@@ -139,7 +139,8 @@ class TransformerBlock(nn.Module):
             mask: Optional boolean self-attention mask of shape (batch, tokens). True = valid token.
             context: Cross-attention context of shape (batch, context_tokens, cross_attention_dim).
                 Required when use_cross_attention=True.
-            context_mask: Optional boolean mask of shape (batch, context_tokens). True = valid token.
+            context_mask: Optional boolean mask of shape (batch, context_tokens).
+                True = valid token.
 
         Returns:
             Output tensor of shape (batch, tokens, embedding_dim).

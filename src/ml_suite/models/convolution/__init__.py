@@ -5,8 +5,8 @@ from .blocks import (
     ConditionedConvNet,
     ConvBlock,
     ConvNet,
-    SeparableConvBlock,
     SeparableConditionedConvBlock,
+    SeparableConvBlock,
 )
 
 __all__ = [

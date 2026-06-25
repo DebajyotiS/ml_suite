@@ -3,9 +3,8 @@
 from collections.abc import Sequence
 
 import torch
-from torch import nn
 
-from ml_suite.models.convolution import ConvBlock, ConditionedConvBlock
+from ml_suite.models.convolution import ConditionedConvBlock, ConvBlock
 
 from .base import BaseUNet
 from .conditioning import ConditioningBuilder

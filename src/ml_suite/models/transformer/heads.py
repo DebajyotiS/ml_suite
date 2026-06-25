@@ -5,9 +5,9 @@ from __future__ import annotations
 import torch
 from torch import nn
 
+from ...utils.activations import get_activation
 from .pooling import TokenPooling
 from .types import PoolingMode
-from ...utils.activations import get_activation
 
 
 def make_head_mlp(

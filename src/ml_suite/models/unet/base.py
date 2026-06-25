@@ -5,7 +5,7 @@ from collections.abc import Sequence
 import torch
 from torch import nn
 
-from ml_suite.models.convolution import ConvBlock, ConditionedConvBlock
+from ml_suite.models.convolution import ConditionedConvBlock, ConvBlock
 from ml_suite.utils.activations import get_activation
 
 from .attention import SpatialAttentionBlock
@@ -327,7 +327,8 @@ class BaseUNet(nn.Module):
         if cross_context is not None:
             if cross_context.ndim != 3:
                 raise ValueError(
-                    f"cross_context must have shape (batch, tokens, dim). Got {cross_context.shape}."
+                    f"cross_context must have shape (batch, tokens, dim)."
+                    f" Got {cross_context.shape}."
                 )
             if cross_context.shape[0] != batch_size:
                 raise ValueError(

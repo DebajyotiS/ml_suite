@@ -1,8 +1,7 @@
 """Model components."""
 
-from .convolution import ConvBlock, ConditionedConvBlock, ConvNet, ConditionedConvNet
-from .linear import LinearBlock, MLP
-from .unet import ConditionedUNet, UNet
+from .convolution import ConditionedConvBlock, ConditionedConvNet, ConvBlock, ConvNet
+from .linear import MLP, LinearBlock
 from .transformer import (
     ConditionedTokenTransformer,
     PatchTransformerND,
@@ -10,6 +9,7 @@ from .transformer import (
     TokenToTokenTransformer,
     TokenToVectorTransformer,
 )
+from .unet import ConditionedUNet, UNet
 
 __all__ = [
     "ConvBlock",

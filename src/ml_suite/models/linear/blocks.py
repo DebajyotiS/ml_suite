@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import List, Literal
+from typing import Literal
 
 import torch
 import torch.nn as nn
@@ -15,14 +15,16 @@ class LinearBlock(nn.Module):
 
     This block wraps a standard linear mapping while offering multiple ways to inject secondary
     context tensors (e.g., conditioning tokens, embeddings, or timesteps). The layer ordering
-    executes as follows: Context Conditioning -> Linear Projection -> Residual Addition -> Activation.
+    executes as follows: Context Conditioning -> Linear Projection -> Residual Addition ->
+    Activation.
 
     Args:
         input_dim: Number of features in the input tensor.
         output_dim: Number of features produced by the main linear projection.
         context_dim: Number of features in the conditioning context tensor. Set to 0 to disable.
         context_injection: The mechanism used to merge the context tensor into the main stream:
-            - 'concat': Concatenates input and context along the feature dimension before projection.
+            - 'concat': Concatenates input and context along the feature dimension before
+              projection.
             - 'add': Projects context to match input features and sums them.
             - 'multiply': Projects context to match input features and multiplies them.
             - 'film': Computes feature-wise affine scaling and shifting parameters from the context.
@@ -47,7 +49,8 @@ class LinearBlock(nn.Module):
         super().__init__()
         if do_residual and input_dim != output_dim:
             raise ValueError(
-                f"Residual connection requires input_dim ({input_dim}) to equal output_dim ({output_dim})."
+                f"Residual connection requires input_dim ({input_dim}) to equal"
+                f" output_dim ({output_dim})."
             )
 
         self.input_dim = input_dim
@@ -176,9 +179,9 @@ class MLP(nn.Module):
         num_layers: int,
         context_dim: int = 0,
         context_injection: Literal["concat", "add", "multiply", "film", "cross_attn"] = "concat",
-        hidden_layers: List[int] | None = None,
+        hidden_layers: list[int] | None = None,
         activation: str = "silu",
-        activation_list: List[str] | None = None,
+        activation_list: list[str] | None = None,
         do_residual: bool = False,
     ) -> None:
         super().__init__()
@@ -196,7 +199,8 @@ class MLP(nn.Module):
 
         if len(layers) != num_layers - 1:
             raise ValueError(
-                f"Length of hidden_layers ({len(layers)}) must be num_layers - 1 ({num_layers - 1})."
+                f"Length of hidden_layers ({len(layers)}) must be"
+                f" num_layers - 1 ({num_layers - 1})."
             )
         if len(activations) != num_layers:
             raise ValueError(
@@ -244,7 +248,7 @@ class MLP(nn.Module):
         lines = [
             f"MLP (input_dim={self.input_dim} -> hidden_dim={self.hidden_dim})",
             f"  ├── Context: dim={self.context_dim}, Type={context_str}",
-            f"  └── Blocks Stack:",
+            "  └── Blocks Stack:",
         ]
         for i, block in enumerate(self.blocks):
             lines.append(f"        [{i}] └── {block}")

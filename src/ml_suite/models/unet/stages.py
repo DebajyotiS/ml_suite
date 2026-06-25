@@ -1,12 +1,10 @@
 """Reusable encoder and decoder stages for plain and conditioned U-Nets."""
 
-from collections.abc import Callable
-
 import torch
 from torch import nn
 from torch.nn import functional as F
 
-from ml_suite.models.convolution import ConvBlock, ConditionedConvBlock
+from ml_suite.models.convolution import ConditionedConvBlock, ConvBlock
 
 from .attention import SpatialAttentionBlock
 from .types import NormType, ShapePolicy, SkipMode, UpsampleMode

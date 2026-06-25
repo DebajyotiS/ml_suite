@@ -342,7 +342,8 @@ class ConditionedTokenTransformer(nn.Module):
         )
 
         tokens = self.absolute_position(tokens)
-        # TODO: Consider generalising to allow conditioning to be merged in other ways (e.g. concatenation, FiLM, etc.)
+        # TODO: Consider generalising to allow conditioning to be merged in other ways
+        # (e.g. concatenation, FiLM, etc.)
         tokens = tokens + condition[:, None, :]
         tokens = self.stack(
             tokens,
