@@ -34,6 +34,8 @@ Lower-level building blocks used by the transformer models: attention layers, fe
 
 ## Tokenizers
 
+> **Note on naming:** "Tokenizers" here means the components that convert raw modality inputs into the `(B, T, embedding_dim)` format the transformer expects — including input projection for continuous features, embedding lookup for discrete IDs, and patch extraction for spatial data. Upstream segmentation (e.g. BPE) is handled outside these classes and is out of scope.
+
 ### ContinuousInputTokenizer
 
 ::: ml_suite.models.transformer.tokenization.ContinuousInputTokenizer

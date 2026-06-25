@@ -3,8 +3,24 @@ name: Build
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
+      - "uv.lock"
   pull_request:
     branches: [main]
+    paths:
+      - "src/**"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "pyproject.toml"
+      - "uv.lock"
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lint:
@@ -42,3 +58,21 @@ jobs:
 
       - name: Build package
         run: uv build
+
+  docs-check:
+    name: Docs build check
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Build docs (strict)
+        run: uv run mkdocs build --strict
