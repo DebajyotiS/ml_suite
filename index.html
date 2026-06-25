@@ -67,7 +67,7 @@
     
     
     
-    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo">
   
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
@@ -122,7 +122,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
     
       <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -132,7 +132,7 @@
     
     
     
-    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
     
       <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
@@ -882,44 +882,52 @@
 <p>Reusable, dimension-agnostic deep learning building blocks for generative modelling research. Build classifiers, diffusion models, flow-matching networks, and point-cloud models from composable PyTorch primitives that work identically across 1D, 2D, and 3D data.</p>
 <hr />
 <h2 id="where-to-start">Where to start</h2>
+<p>Pick the tab that matches your goal. Each one shows the recommended model and a minimal working example. The API links at the bottom of each tab have the full parameter reference.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">I want to classify something</label><label for="__tabbed_1_2">I want a diffusion / flow model</label><label for="__tabbed_1_3">I want a patch / ViT model</label><label for="__tabbed_1_4">I want to build something custom</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p><strong>ConvNet</strong> for images or signals, <strong>TokenToClassTransformer</strong> for sets and sequences.</p>
+<p>Use <strong><code>ConvNet</code></strong> when your input is a spatial grid like images, 1D signals, or 3D volumes. Use <strong><code>make_point_cloud_classifier</code></strong> when your input is an unordered set of points, since the transformer is permutation-invariant and order does not matter.</p>
+<p>Both return a logit vector of shape <code>(batch, num_classes)</code>.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.convolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConvNet</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.transformer.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_point_cloud_classifier</span>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
-<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># 2-D image classifier</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="c1"># 2-D image classifier (e.g. CIFAR-10)</span>
 <a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">model</span> <span class="o">=</span> <span class="n">ConvNet</span><span class="p">(</span><span class="n">conv_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">stage_channels</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">],</span>
 <a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>                <span class="n">blocks_per_stage</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 <a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
-<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Permutation-invariant point-cloud classifier</span>
+<a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Permutation-invariant point-cloud classifier (e.g. ModelNet40)</span>
 <a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">model</span> <span class="o">=</span> <span class="n">make_point_cloud_classifier</span><span class="p">(</span><span class="n">point_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span>
 <a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>                                    <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </code></pre></div>
 <p>See: <a href="api/convolution/">Convolution</a> · <a href="api/transformer/presets/">Transformer presets</a></p>
 </div>
 <div class="tabbed-block">
-<p><strong>ConditionedUNet</strong> for spatial data, <strong>ConditionedTokenTransformer</strong> or the conditioned preset for sets and point clouds.</p>
+<p>These models learn to predict a denoising direction (DDPM) or a velocity field (flow matching) and require a <strong>time embedding</strong> at every forward pass.</p>
+<p>Use <strong><code>ConditionedUNet</code></strong> for spatial data with local structure like images or voxels. Use <strong><code>make_conditioned_point_to_point_model</code></strong> for point sets or sequences where you want a per-token output of the same shape as the input.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.unet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConditionedUNet</span>
 <a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.transformer.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_conditioned_point_to_point_model</span>
 <a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Time-conditioned 2-D U-Net (DDPM / EDM style)</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="c1"># Time-conditioned 2-D U-Net (DDPM / EDM style). Output shape matches input.</span>
 <a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="n">model</span> <span class="o">=</span> <span class="n">ConditionedUNet</span><span class="p">(</span><span class="n">conv_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">out_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
 <a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>                        <span class="n">stage_channels</span><span class="o">=</span><span class="p">[</span><span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">512</span><span class="p">],</span>
 <a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>                        <span class="n">time_conditioning</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>  <span class="c1"># x: (B, 3, H, W), t: (B,)</span>
 <a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Flow-matching velocity field on point sets</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="c1"># Flow-matching velocity field on point sets. Output shape matches input.</span>
 <a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="n">model</span> <span class="o">=</span> <span class="n">make_conditioned_point_to_point_model</span><span class="p">(</span>
 <a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>    <span class="n">point_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">output_dim</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
 <a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>    <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">time_conditioning</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>  <span class="c1"># x: (B, N, 3), t: (B,)</span>
 </code></pre></div>
 <p>See: <a href="api/unet/">U-Net</a> · <a href="api/transformer/presets/">Transformer presets</a></p>
 </div>
 <div class="tabbed-block">
-<p><strong>PatchTransformerND</strong> handles 1-D, 2-D, and 3-D grids and supports grid reconstruction, token-level output, or a pooled vector.</p>
+<p><strong><code>PatchTransformerND</code></strong> splits a spatial grid into non-overlapping patches, encodes them with a transformer, and can produce different output shapes depending on your task:</p>
+<ul>
+<li><strong>Grid reconstruction</strong> (<code>make_patch_grid_model</code>): output has the same spatial shape as the input, useful for segmentation or denoising backbones.</li>
+<li><strong>Classification</strong> (<code>make_patch_classifier</code>): a single pooled class vector, the standard ViT setup.</li>
+</ul>
+<p>Both work on 1-D, 2-D, and 3-D grids without changing the API.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.transformer.presets</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_patch_grid_model</span><span class="p">,</span> <span class="n">make_patch_classifier</span>
 <a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>
 <a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="c1"># ViT-style image-to-image (e.g. segmentation backbone)</span>
@@ -927,7 +935,7 @@
 <a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>                              <span class="n">patch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
 <a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>                              <span class="n">depth</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a>
-<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># ViT classifier</span>
+<a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="c1"># ViT classifier (e.g. ImageNet)</span>
 <a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="n">model</span> <span class="o">=</span> <span class="n">make_patch_classifier</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">in_channels</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
 <a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>                              <span class="n">patch_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">768</span><span class="p">,</span>
 <a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>                              <span class="n">depth</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
@@ -935,7 +943,8 @@
 <p>See: <a href="api/transformer/presets/">Transformer presets</a> · <a href="api/transformer/models/">Transformer models</a></p>
 </div>
 <div class="tabbed-block">
-<p>Compose lower-level primitives directly.</p>
+<p>The preset functions are thin wrappers around composable primitives. If you need a non-standard architecture with mixed modalities, custom conditioning, or unusual head shapes, you can wire the pieces together directly.</p>
+<p>The typical stack is <strong>tokenizer -&gt; transformer -&gt; head</strong>, with optional conditioning injected at the transformer level via FiLM or cross-attention.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ml_suite.models.transformer</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
 <a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>    <span class="n">ContinuousInputTokenizer</span><span class="p">,</span> <span class="n">TransformerStack</span><span class="p">,</span>
 <a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="n">PooledHead</span><span class="p">,</span> <span class="n">RotaryEmbedding</span><span class="p">,</span>
@@ -945,6 +954,10 @@
 <a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">ContinuousInputTokenizer</span><span class="p">(</span><span class="n">input_dim</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">embedding_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
 <a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">stack</span> <span class="o">=</span> <span class="n">TransformerStack</span><span class="p">(</span><span class="n">embedding_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">num_heads</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="n">head</span> <span class="o">=</span> <span class="n">PooledHead</span><span class="p">(</span><span class="n">embedding_dim</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span> <span class="n">output_dim</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a>
+<a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>       <span class="c1"># (B, N, 256)</span>
+<a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="n">encoded</span> <span class="o">=</span> <span class="n">stack</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>     <span class="c1"># (B, N, 256)</span>
+<a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="n">out</span> <span class="o">=</span> <span class="n">head</span><span class="p">(</span><span class="n">encoded</span><span class="p">)</span>         <span class="c1"># (B, 10)</span>
 </code></pre></div>
 <p>See: <a href="api/transformer/primitives/">Transformer primitives</a> · <a href="api/linear/">Linear</a></p>
 </div>
