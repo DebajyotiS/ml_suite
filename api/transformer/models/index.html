@@ -2177,7 +2177,8 @@ Required when cross_attention_dim is set.</p>
 <span class="normal"><a href="#__codelineno-0-350">350</a></span>
 <span class="normal"><a href="#__codelineno-0-351">351</a></span>
 <span class="normal"><a href="#__codelineno-0-352">352</a></span>
-<span class="normal"><a href="#__codelineno-0-353">353</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
+<span class="normal"><a href="#__codelineno-0-353">353</a></span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-294" name="__codelineno-0-294"></a><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
 <a id="__codelineno-0-295" name="__codelineno-0-295"></a>    <span class="bp">self</span><span class="p">,</span>
 <a id="__codelineno-0-296" name="__codelineno-0-296"></a>    <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
 <a id="__codelineno-0-297" name="__codelineno-0-297"></a>    <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -2228,15 +2229,16 @@ Required when cross_attention_dim is set.</p>
 <a id="__codelineno-0-342" name="__codelineno-0-342"></a>    <span class="p">)</span>
 <a id="__codelineno-0-343" name="__codelineno-0-343"></a>
 <a id="__codelineno-0-344" name="__codelineno-0-344"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_position</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-<a id="__codelineno-0-345" name="__codelineno-0-345"></a>    <span class="c1"># TODO: Consider generalising to allow conditioning to be merged in other ways (e.g. concatenation, FiLM, etc.)</span>
-<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span> <span class="o">+</span> <span class="n">condition</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
-<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-<a id="__codelineno-0-348" name="__codelineno-0-348"></a>        <span class="n">tokens</span><span class="p">,</span>
-<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
-<a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="n">context</span><span class="o">=</span><span class="n">cross_context</span><span class="p">,</span>
-<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">context_mask</span><span class="o">=</span><span class="n">cross_context_mask</span><span class="p">,</span>
-<a id="__codelineno-0-352" name="__codelineno-0-352"></a>    <span class="p">)</span>
-<a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<a id="__codelineno-0-345" name="__codelineno-0-345"></a>    <span class="c1"># TODO: Consider generalising to allow conditioning to be merged in other ways</span>
+<a id="__codelineno-0-346" name="__codelineno-0-346"></a>    <span class="c1"># (e.g. concatenation, FiLM, etc.)</span>
+<a id="__codelineno-0-347" name="__codelineno-0-347"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span> <span class="o">+</span> <span class="n">condition</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+<a id="__codelineno-0-348" name="__codelineno-0-348"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+<a id="__codelineno-0-349" name="__codelineno-0-349"></a>        <span class="n">tokens</span><span class="p">,</span>
+<a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="n">mask</span><span class="o">=</span><span class="n">mask</span><span class="p">,</span>
+<a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">context</span><span class="o">=</span><span class="n">cross_context</span><span class="p">,</span>
+<a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">context_mask</span><span class="o">=</span><span class="n">cross_context_mask</span><span class="p">,</span>
+<a id="__codelineno-0-353" name="__codelineno-0-353"></a>    <span class="p">)</span>
+<a id="__codelineno-0-354" name="__codelineno-0-354"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2282,8 +2284,7 @@ Required when cross_attention_dim is set.</p>
 
                   <details class="mkdocstrings-source">
                     <summary>Source code in <code>src/ml_suite/models/transformer/models.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-359">359</a></span>
-<span class="normal"><a href="#__codelineno-0-360">360</a></span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-360">360</a></span>
 <span class="normal"><a href="#__codelineno-0-361">361</a></span>
 <span class="normal"><a href="#__codelineno-0-362">362</a></span>
 <span class="normal"><a href="#__codelineno-0-363">363</a></span>
@@ -2355,80 +2356,81 @@ Required when cross_attention_dim is set.</p>
 <span class="normal"><a href="#__codelineno-0-429">429</a></span>
 <span class="normal"><a href="#__codelineno-0-430">430</a></span>
 <span class="normal"><a href="#__codelineno-0-431">431</a></span>
-<span class="normal"><a href="#__codelineno-0-432">432</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-359" name="__codelineno-0-359"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-<a id="__codelineno-0-360" name="__codelineno-0-360"></a>    <span class="bp">self</span><span class="p">,</span>
-<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="n">patch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
-<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">embedding_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-366" name="__codelineno-0-366"></a>    <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-367" name="__codelineno-0-367"></a>    <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<a id="__codelineno-0-368" name="__codelineno-0-368"></a>    <span class="n">output_mode</span><span class="p">:</span> <span class="n">PatchOutputMode</span> <span class="o">=</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-369" name="__codelineno-0-369"></a>    <span class="n">vector_output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-370" name="__codelineno-0-370"></a>    <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<a id="__codelineno-0-371" name="__codelineno-0-371"></a>    <span class="n">positional_encoding</span><span class="p">:</span> <span class="n">PositionalEncodingMode</span> <span class="o">=</span> <span class="s2">&quot;sinusoidal&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-372" name="__codelineno-0-372"></a>    <span class="n">pooling</span><span class="p">:</span> <span class="n">PoolingMode</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
-<a id="__codelineno-0-373" name="__codelineno-0-373"></a>    <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
-<a id="__codelineno-0-374" name="__codelineno-0-374"></a>    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="n">attention_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-<a id="__codelineno-0-376" name="__codelineno-0-376"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-377" name="__codelineno-0-377"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-<a id="__codelineno-0-378" name="__codelineno-0-378"></a>
-<a id="__codelineno-0-379" name="__codelineno-0-379"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="s2">&quot;tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span><span class="p">):</span>
-<a id="__codelineno-0-380" name="__codelineno-0-380"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported output_mode: </span><span class="si">{</span><span class="n">output_mode</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-381" name="__codelineno-0-381"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span> <span class="ow">and</span> <span class="n">vector_output_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-382" name="__codelineno-0-382"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;vector_output_dim is required when output_mode=&#39;vector&#39;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-383" name="__codelineno-0-383"></a>
-<a id="__codelineno-0-384" name="__codelineno-0-384"></a>    <span class="n">positional_encoding</span> <span class="o">=</span> <span class="n">normalize_positional_encoding_mode</span><span class="p">(</span><span class="n">positional_encoding</span><span class="p">)</span>
-<a id="__codelineno-0-385" name="__codelineno-0-385"></a>    <span class="n">stack_positional</span> <span class="o">=</span> <span class="n">_stack_positional</span><span class="p">(</span><span class="n">positional_encoding</span><span class="p">)</span>
-<a id="__codelineno-0-386" name="__codelineno-0-386"></a>
-<a id="__codelineno-0-387" name="__codelineno-0-387"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span><span class="p">:</span> <span class="n">PatchDecoderND</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-388" name="__codelineno-0-388"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span><span class="p">:</span> <span class="n">PooledHead</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-<a id="__codelineno-0-389" name="__codelineno-0-389"></a>
-<a id="__codelineno-0-390" name="__codelineno-0-390"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">=</span> <span class="n">output_mode</span>
-<a id="__codelineno-0-391" name="__codelineno-0-391"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">PatchTokenizerND</span><span class="p">(</span>
-<a id="__codelineno-0-392" name="__codelineno-0-392"></a>        <span class="n">spatial_dim</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
-<a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="n">in_channels</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
-<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
-<a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
-<a id="__codelineno-0-396" name="__codelineno-0-396"></a>    <span class="p">)</span>
-<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">absolute_position</span> <span class="o">=</span> <span class="n">build_absolute_positional_embedding</span><span class="p">(</span>
-<a id="__codelineno-0-398" name="__codelineno-0-398"></a>        <span class="n">mode</span><span class="o">=</span><span class="n">positional_encoding</span><span class="p">,</span>
-<a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
-<a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
-<a id="__codelineno-0-401" name="__codelineno-0-401"></a>    <span class="p">)</span>
-<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="n">TransformerStack</span><span class="p">(</span>
-<a id="__codelineno-0-403" name="__codelineno-0-403"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
-<a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
-<a id="__codelineno-0-405" name="__codelineno-0-405"></a>        <span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span>
-<a id="__codelineno-0-406" name="__codelineno-0-406"></a>        <span class="n">mlp_ratio</span><span class="o">=</span><span class="n">mlp_ratio</span><span class="p">,</span>
-<a id="__codelineno-0-407" name="__codelineno-0-407"></a>        <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
-<a id="__codelineno-0-408" name="__codelineno-0-408"></a>        <span class="n">attention_dropout</span><span class="o">=</span><span class="n">attention_dropout</span><span class="p">,</span>
-<a id="__codelineno-0-409" name="__codelineno-0-409"></a>        <span class="n">positional_encoding</span><span class="o">=</span><span class="n">stack_positional</span><span class="p">,</span>
-<a id="__codelineno-0-410" name="__codelineno-0-410"></a>    <span class="p">)</span>
-<a id="__codelineno-0-411" name="__codelineno-0-411"></a>
-<a id="__codelineno-0-412" name="__codelineno-0-412"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-413" name="__codelineno-0-413"></a>        <span class="k">if</span> <span class="n">out_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-<a id="__codelineno-0-414" name="__codelineno-0-414"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;out_channels is required when output_mode=&#39;grid&#39;.&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-415" name="__codelineno-0-415"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span> <span class="o">=</span> <span class="n">PatchDecoderND</span><span class="p">(</span>
-<a id="__codelineno-0-416" name="__codelineno-0-416"></a>            <span class="n">input_dim</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
-<a id="__codelineno-0-417" name="__codelineno-0-417"></a>            <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
-<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="n">out_channels</span><span class="o">=</span><span class="n">out_channels</span><span class="p">,</span>
-<a id="__codelineno-0-419" name="__codelineno-0-419"></a>            <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
-<a id="__codelineno-0-420" name="__codelineno-0-420"></a>        <span class="p">)</span>
-<a id="__codelineno-0-421" name="__codelineno-0-421"></a>    <span class="k">elif</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-422" name="__codelineno-0-422"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span> <span class="o">=</span> <span class="n">PooledHead</span><span class="p">(</span>
-<a id="__codelineno-0-423" name="__codelineno-0-423"></a>            <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
-<a id="__codelineno-0-424" name="__codelineno-0-424"></a>            <span class="n">output_dim</span><span class="o">=</span><span class="n">vector_output_dim</span><span class="p">,</span>
-<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="n">pooling</span><span class="o">=</span><span class="n">pooling</span><span class="p">,</span>
-<a id="__codelineno-0-426" name="__codelineno-0-426"></a>        <span class="p">)</span>
-<a id="__codelineno-0-427" name="__codelineno-0-427"></a>    <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;tokens&quot;</span>
-<a id="__codelineno-0-428" name="__codelineno-0-428"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">token_decoder</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span> <span class="o">=</span> <span class="p">(</span>
-<a id="__codelineno-0-429" name="__codelineno-0-429"></a>            <span class="n">TokenwiseHead</span><span class="p">(</span><span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="o">=</span><span class="n">out_channels</span><span class="p">)</span>
-<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="k">if</span> <span class="n">out_channels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
-<a id="__codelineno-0-432" name="__codelineno-0-432"></a>        <span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-432">432</a></span>
+<span class="normal"><a href="#__codelineno-0-433">433</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-360" name="__codelineno-0-360"></a><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+<a id="__codelineno-0-361" name="__codelineno-0-361"></a>    <span class="bp">self</span><span class="p">,</span>
+<a id="__codelineno-0-362" name="__codelineno-0-362"></a>    <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-363" name="__codelineno-0-363"></a>    <span class="n">in_channels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-364" name="__codelineno-0-364"></a>    <span class="n">out_channels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-365" name="__codelineno-0-365"></a>    <span class="n">patch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+<a id="__codelineno-0-366" name="__codelineno-0-366"></a>    <span class="n">embedding_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-367" name="__codelineno-0-367"></a>    <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-368" name="__codelineno-0-368"></a>    <span class="n">num_heads</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<a id="__codelineno-0-369" name="__codelineno-0-369"></a>    <span class="n">output_mode</span><span class="p">:</span> <span class="n">PatchOutputMode</span> <span class="o">=</span> <span class="s2">&quot;grid&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-370" name="__codelineno-0-370"></a>    <span class="n">vector_output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-371" name="__codelineno-0-371"></a>    <span class="n">max_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<a id="__codelineno-0-372" name="__codelineno-0-372"></a>    <span class="n">positional_encoding</span><span class="p">:</span> <span class="n">PositionalEncodingMode</span> <span class="o">=</span> <span class="s2">&quot;sinusoidal&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-373" name="__codelineno-0-373"></a>    <span class="n">pooling</span><span class="p">:</span> <span class="n">PoolingMode</span> <span class="o">=</span> <span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+<a id="__codelineno-0-374" name="__codelineno-0-374"></a>    <span class="n">mlp_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span><span class="p">,</span>
+<a id="__codelineno-0-375" name="__codelineno-0-375"></a>    <span class="n">dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-0-376" name="__codelineno-0-376"></a>    <span class="n">attention_dropout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+<a id="__codelineno-0-377" name="__codelineno-0-377"></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-378" name="__codelineno-0-378"></a>    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+<a id="__codelineno-0-379" name="__codelineno-0-379"></a>
+<a id="__codelineno-0-380" name="__codelineno-0-380"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;grid&quot;</span><span class="p">,</span> <span class="s2">&quot;tokens&quot;</span><span class="p">,</span> <span class="s2">&quot;vector&quot;</span><span class="p">):</span>
+<a id="__codelineno-0-381" name="__codelineno-0-381"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported output_mode: </span><span class="si">{</span><span class="n">output_mode</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-382" name="__codelineno-0-382"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span> <span class="ow">and</span> <span class="n">vector_output_dim</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-383" name="__codelineno-0-383"></a>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;vector_output_dim is required when output_mode=&#39;vector&#39;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-384" name="__codelineno-0-384"></a>
+<a id="__codelineno-0-385" name="__codelineno-0-385"></a>    <span class="n">positional_encoding</span> <span class="o">=</span> <span class="n">normalize_positional_encoding_mode</span><span class="p">(</span><span class="n">positional_encoding</span><span class="p">)</span>
+<a id="__codelineno-0-386" name="__codelineno-0-386"></a>    <span class="n">stack_positional</span> <span class="o">=</span> <span class="n">_stack_positional</span><span class="p">(</span><span class="n">positional_encoding</span><span class="p">)</span>
+<a id="__codelineno-0-387" name="__codelineno-0-387"></a>
+<a id="__codelineno-0-388" name="__codelineno-0-388"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span><span class="p">:</span> <span class="n">PatchDecoderND</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-389" name="__codelineno-0-389"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span><span class="p">:</span> <span class="n">PooledHead</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<a id="__codelineno-0-390" name="__codelineno-0-390"></a>
+<a id="__codelineno-0-391" name="__codelineno-0-391"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">=</span> <span class="n">output_mode</span>
+<a id="__codelineno-0-392" name="__codelineno-0-392"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">PatchTokenizerND</span><span class="p">(</span>
+<a id="__codelineno-0-393" name="__codelineno-0-393"></a>        <span class="n">spatial_dim</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
+<a id="__codelineno-0-394" name="__codelineno-0-394"></a>        <span class="n">in_channels</span><span class="o">=</span><span class="n">in_channels</span><span class="p">,</span>
+<a id="__codelineno-0-395" name="__codelineno-0-395"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+<a id="__codelineno-0-396" name="__codelineno-0-396"></a>        <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
+<a id="__codelineno-0-397" name="__codelineno-0-397"></a>    <span class="p">)</span>
+<a id="__codelineno-0-398" name="__codelineno-0-398"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">absolute_position</span> <span class="o">=</span> <span class="n">build_absolute_positional_embedding</span><span class="p">(</span>
+<a id="__codelineno-0-399" name="__codelineno-0-399"></a>        <span class="n">mode</span><span class="o">=</span><span class="n">positional_encoding</span><span class="p">,</span>
+<a id="__codelineno-0-400" name="__codelineno-0-400"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+<a id="__codelineno-0-401" name="__codelineno-0-401"></a>        <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
+<a id="__codelineno-0-402" name="__codelineno-0-402"></a>    <span class="p">)</span>
+<a id="__codelineno-0-403" name="__codelineno-0-403"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">stack</span> <span class="o">=</span> <span class="n">TransformerStack</span><span class="p">(</span>
+<a id="__codelineno-0-404" name="__codelineno-0-404"></a>        <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+<a id="__codelineno-0-405" name="__codelineno-0-405"></a>        <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">,</span>
+<a id="__codelineno-0-406" name="__codelineno-0-406"></a>        <span class="n">num_heads</span><span class="o">=</span><span class="n">num_heads</span><span class="p">,</span>
+<a id="__codelineno-0-407" name="__codelineno-0-407"></a>        <span class="n">mlp_ratio</span><span class="o">=</span><span class="n">mlp_ratio</span><span class="p">,</span>
+<a id="__codelineno-0-408" name="__codelineno-0-408"></a>        <span class="n">dropout</span><span class="o">=</span><span class="n">dropout</span><span class="p">,</span>
+<a id="__codelineno-0-409" name="__codelineno-0-409"></a>        <span class="n">attention_dropout</span><span class="o">=</span><span class="n">attention_dropout</span><span class="p">,</span>
+<a id="__codelineno-0-410" name="__codelineno-0-410"></a>        <span class="n">positional_encoding</span><span class="o">=</span><span class="n">stack_positional</span><span class="p">,</span>
+<a id="__codelineno-0-411" name="__codelineno-0-411"></a>    <span class="p">)</span>
+<a id="__codelineno-0-412" name="__codelineno-0-412"></a>
+<a id="__codelineno-0-413" name="__codelineno-0-413"></a>    <span class="k">if</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-414" name="__codelineno-0-414"></a>        <span class="k">if</span> <span class="n">out_channels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+<a id="__codelineno-0-415" name="__codelineno-0-415"></a>            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;out_channels is required when output_mode=&#39;grid&#39;.&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-416" name="__codelineno-0-416"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span> <span class="o">=</span> <span class="n">PatchDecoderND</span><span class="p">(</span>
+<a id="__codelineno-0-417" name="__codelineno-0-417"></a>            <span class="n">input_dim</span><span class="o">=</span><span class="n">input_dim</span><span class="p">,</span>
+<a id="__codelineno-0-418" name="__codelineno-0-418"></a>            <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+<a id="__codelineno-0-419" name="__codelineno-0-419"></a>            <span class="n">out_channels</span><span class="o">=</span><span class="n">out_channels</span><span class="p">,</span>
+<a id="__codelineno-0-420" name="__codelineno-0-420"></a>            <span class="n">patch_size</span><span class="o">=</span><span class="n">patch_size</span><span class="p">,</span>
+<a id="__codelineno-0-421" name="__codelineno-0-421"></a>        <span class="p">)</span>
+<a id="__codelineno-0-422" name="__codelineno-0-422"></a>    <span class="k">elif</span> <span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-423" name="__codelineno-0-423"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span> <span class="o">=</span> <span class="n">PooledHead</span><span class="p">(</span>
+<a id="__codelineno-0-424" name="__codelineno-0-424"></a>            <span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span>
+<a id="__codelineno-0-425" name="__codelineno-0-425"></a>            <span class="n">output_dim</span><span class="o">=</span><span class="n">vector_output_dim</span><span class="p">,</span>
+<a id="__codelineno-0-426" name="__codelineno-0-426"></a>            <span class="n">pooling</span><span class="o">=</span><span class="n">pooling</span><span class="p">,</span>
+<a id="__codelineno-0-427" name="__codelineno-0-427"></a>        <span class="p">)</span>
+<a id="__codelineno-0-428" name="__codelineno-0-428"></a>    <span class="k">else</span><span class="p">:</span>  <span class="c1"># &quot;tokens&quot;</span>
+<a id="__codelineno-0-429" name="__codelineno-0-429"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">token_decoder</span><span class="p">:</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span> <span class="o">=</span> <span class="p">(</span>
+<a id="__codelineno-0-430" name="__codelineno-0-430"></a>            <span class="n">TokenwiseHead</span><span class="p">(</span><span class="n">embedding_dim</span><span class="o">=</span><span class="n">embedding_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="o">=</span><span class="n">out_channels</span><span class="p">)</span>
+<a id="__codelineno-0-431" name="__codelineno-0-431"></a>            <span class="k">if</span> <span class="n">out_channels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<a id="__codelineno-0-432" name="__codelineno-0-432"></a>            <span class="k">else</span> <span class="n">nn</span><span class="o">.</span><span class="n">Identity</span><span class="p">()</span>
+<a id="__codelineno-0-433" name="__codelineno-0-433"></a>        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
                   </details>
 
@@ -2522,8 +2524,7 @@ must be divisible by the corresponding patch_size entry.</p>
 
             <details class="mkdocstrings-source">
               <summary>Source code in <code>src/ml_suite/models/transformer/models.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-434">434</a></span>
-<span class="normal"><a href="#__codelineno-0-435">435</a></span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-435">435</a></span>
 <span class="normal"><a href="#__codelineno-0-436">436</a></span>
 <span class="normal"><a href="#__codelineno-0-437">437</a></span>
 <span class="normal"><a href="#__codelineno-0-438">438</a></span>
@@ -2544,29 +2545,30 @@ must be divisible by the corresponding patch_size entry.</p>
 <span class="normal"><a href="#__codelineno-0-453">453</a></span>
 <span class="normal"><a href="#__codelineno-0-454">454</a></span>
 <span class="normal"><a href="#__codelineno-0-455">455</a></span>
-<span class="normal"><a href="#__codelineno-0-456">456</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-434" name="__codelineno-0-434"></a><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Patchify the input grid, process with the transformer stack, and decode.</span>
-<a id="__codelineno-0-436" name="__codelineno-0-436"></a>
-<a id="__codelineno-0-437" name="__codelineno-0-437"></a><span class="sd">    Args:</span>
-<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">        x: Spatial input of shape (batch, in_channels, *spatial). Each spatial dimension</span>
-<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">            must be divisible by the corresponding patch_size entry.</span>
-<a id="__codelineno-0-440" name="__codelineno-0-440"></a>
-<a id="__codelineno-0-441" name="__codelineno-0-441"></a><span class="sd">    Returns:</span>
-<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">        Decoded output whose shape depends on output_mode:</span>
-<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">            - &#39;grid&#39;: (batch, out_channels, *spatial)</span>
-<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">            - &#39;tokens&#39;: (batch, num_patches, out_channels) or</span>
-<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">                (batch, num_patches, embedding_dim) if out_channels is None</span>
-<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">            - &#39;vector&#39;: (batch, vector_output_dim)</span>
-<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-448" name="__codelineno-0-448"></a>    <span class="n">tokens</span><span class="p">,</span> <span class="n">grid_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_position</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-<a id="__codelineno-0-451" name="__codelineno-0-451"></a>
-<a id="__codelineno-0-452" name="__codelineno-0-452"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-453" name="__codelineno-0-453"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">grid_shape</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">)</span>
-<a id="__codelineno-0-454" name="__codelineno-0-454"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span>
-<a id="__codelineno-0-455" name="__codelineno-0-455"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
-<a id="__codelineno-0-456" name="__codelineno-0-456"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<span class="normal"><a href="#__codelineno-0-456">456</a></span>
+<span class="normal"><a href="#__codelineno-0-457">457</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-435" name="__codelineno-0-435"></a><span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<a id="__codelineno-0-436" name="__codelineno-0-436"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Patchify the input grid, process with the transformer stack, and decode.</span>
+<a id="__codelineno-0-437" name="__codelineno-0-437"></a>
+<a id="__codelineno-0-438" name="__codelineno-0-438"></a><span class="sd">    Args:</span>
+<a id="__codelineno-0-439" name="__codelineno-0-439"></a><span class="sd">        x: Spatial input of shape (batch, in_channels, *spatial). Each spatial dimension</span>
+<a id="__codelineno-0-440" name="__codelineno-0-440"></a><span class="sd">            must be divisible by the corresponding patch_size entry.</span>
+<a id="__codelineno-0-441" name="__codelineno-0-441"></a>
+<a id="__codelineno-0-442" name="__codelineno-0-442"></a><span class="sd">    Returns:</span>
+<a id="__codelineno-0-443" name="__codelineno-0-443"></a><span class="sd">        Decoded output whose shape depends on output_mode:</span>
+<a id="__codelineno-0-444" name="__codelineno-0-444"></a><span class="sd">            - &#39;grid&#39;: (batch, out_channels, *spatial)</span>
+<a id="__codelineno-0-445" name="__codelineno-0-445"></a><span class="sd">            - &#39;tokens&#39;: (batch, num_patches, out_channels) or</span>
+<a id="__codelineno-0-446" name="__codelineno-0-446"></a><span class="sd">                (batch, num_patches, embedding_dim) if out_channels is None</span>
+<a id="__codelineno-0-447" name="__codelineno-0-447"></a><span class="sd">            - &#39;vector&#39;: (batch, vector_output_dim)</span>
+<a id="__codelineno-0-448" name="__codelineno-0-448"></a><span class="sd">    &quot;&quot;&quot;</span>
+<a id="__codelineno-0-449" name="__codelineno-0-449"></a>    <span class="n">tokens</span><span class="p">,</span> <span class="n">grid_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<a id="__codelineno-0-450" name="__codelineno-0-450"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">absolute_position</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<a id="__codelineno-0-451" name="__codelineno-0-451"></a>    <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<a id="__codelineno-0-452" name="__codelineno-0-452"></a>
+<a id="__codelineno-0-453" name="__codelineno-0-453"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;grid&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-454" name="__codelineno-0-454"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">patch_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">,</span> <span class="n">grid_shape</span><span class="o">=</span><span class="n">grid_shape</span><span class="p">)</span>
+<a id="__codelineno-0-455" name="__codelineno-0-455"></a>    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_mode</span> <span class="o">==</span> <span class="s2">&quot;vector&quot;</span><span class="p">:</span>
+<a id="__codelineno-0-456" name="__codelineno-0-456"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">vector_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
+<a id="__codelineno-0-457" name="__codelineno-0-457"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">token_decoder</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
