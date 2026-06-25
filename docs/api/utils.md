@@ -4,18 +4,12 @@
 
 ---
 
-## get_activation
+## Activations
 
-::: ml_suite.utils.activations.get_activation
-
----
-
-## SinusoidalTimeEmbedding
-
-::: ml_suite.utils.conditioning.SinusoidalTimeEmbedding
+::: ml_suite.utils.activations
 
 ---
 
-## TimeEmbeddingMLP
+## Time embeddings
 
-::: ml_suite.utils.conditioning.TimeEmbeddingMLP
+::: ml_suite.utils.conditioning

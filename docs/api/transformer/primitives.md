@@ -6,29 +6,15 @@ Lower-level building blocks used by the transformer models: attention layers, fe
 
 ## Attention
 
-### MultiHeadSelfAttention
-
-::: ml_suite.models.transformer.attention.MultiHeadSelfAttention
-
-### MultiHeadCrossAttention
-
-::: ml_suite.models.transformer.attention.MultiHeadCrossAttention
+::: ml_suite.models.transformer.attention
 
 ---
 
 ## Blocks and stack
 
-### FeedForward
+::: ml_suite.models.transformer.blocks
 
-::: ml_suite.models.transformer.blocks.FeedForward
-
-### TransformerBlock
-
-::: ml_suite.models.transformer.blocks.TransformerBlock
-
-### TransformerStack
-
-::: ml_suite.models.transformer.stacks.TransformerStack
+::: ml_suite.models.transformer.stacks
 
 ---
 
@@ -36,82 +22,30 @@ Lower-level building blocks used by the transformer models: attention layers, fe
 
 > **Note on naming:** "Tokenizers" here means the components that convert raw modality inputs into the `(B, T, embedding_dim)` format the transformer expects — including input projection for continuous features, embedding lookup for discrete IDs, and patch extraction for spatial data. Upstream segmentation (e.g. BPE) is handled outside these classes and is out of scope.
 
-### ContinuousInputTokenizer
-
-::: ml_suite.models.transformer.tokenization.ContinuousInputTokenizer
-
-### DiscreteTokenTokenizer
-
-::: ml_suite.models.transformer.tokenization.DiscreteTokenTokenizer
-
-### PatchTokenizerND
-
-::: ml_suite.models.transformer.tokenization.PatchTokenizerND
-
-### SetTokenizer
-
-::: ml_suite.models.transformer.tokenization.SetTokenizer
+::: ml_suite.models.transformer.tokenization
 
 ---
 
 ## Positional encodings
 
-### LearnedPositionalEmbedding
-
-::: ml_suite.models.transformer.positional.LearnedPositionalEmbedding
-
-### SinusoidalPositionalEmbedding
-
-::: ml_suite.models.transformer.positional.SinusoidalPositionalEmbedding
-
-### RotaryEmbedding
-
-::: ml_suite.models.transformer.positional.RotaryEmbedding
+::: ml_suite.models.transformer.positional
 
 ---
 
 ## Heads
 
-### TokenwiseHead
-
-::: ml_suite.models.transformer.heads.TokenwiseHead
-
-### PooledHead
-
-::: ml_suite.models.transformer.heads.PooledHead
-
-### ClassificationHead
-
-::: ml_suite.models.transformer.heads.ClassificationHead
-
-### RegressionHead
-
-::: ml_suite.models.transformer.heads.RegressionHead
+::: ml_suite.models.transformer.heads
 
 ---
 
 ## Decoders
 
-### TokenDecoder
-
-::: ml_suite.models.transformer.decoders.TokenDecoder
-
-### PatchDecoderND
-
-::: ml_suite.models.transformer.decoders.PatchDecoderND
-
-### QuerySetDecoder
-
-::: ml_suite.models.transformer.decoders.QuerySetDecoder
+::: ml_suite.models.transformer.decoders
 
 ---
 
 ## Conditioning
 
-### TransformerConditioningBuilder
-
-::: ml_suite.models.transformer.conditioning.TransformerConditioningBuilder
-
-### ConditionTokenProjector
-
-::: ml_suite.models.transformer.conditioning.ConditionTokenProjector
+::: ml_suite.models.transformer.conditioning
+    options:
+      members: [TransformerConditioningBuilder, ConditionTokenProjector]

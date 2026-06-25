@@ -4,24 +4,12 @@
 
 ---
 
-## LinearBlock
+## Linear blocks
 
-::: ml_suite.models.linear.blocks.LinearBlock
-
----
-
-## MLP
-
-::: ml_suite.models.linear.blocks.MLP
+::: ml_suite.models.linear.blocks
 
 ---
 
-## VADState
+## VAD inference
 
-::: ml_suite.models.linear.vad.VADState
-
----
-
-## LinearVADInference
-
-::: ml_suite.models.linear.vad.LinearVADInference
+::: ml_suite.models.linear.vad

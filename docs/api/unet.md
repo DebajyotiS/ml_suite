@@ -4,36 +4,26 @@
 
 ---
 
-## UNet
+## Models
 
-::: ml_suite.models.unet.models.UNet
-
----
-
-## ConditionedUNet
-
-::: ml_suite.models.unet.models.ConditionedUNet
+::: ml_suite.models.unet.models
 
 ---
 
-## UNetStage
+## Stages
 
-::: ml_suite.models.unet.stages.UNetStage
-
----
-
-## UNetUpStage
-
-::: ml_suite.models.unet.stages.UNetUpStage
+::: ml_suite.models.unet.stages
 
 ---
 
-## SpatialAttentionBlock
+## Attention
 
-::: ml_suite.models.unet.attention.SpatialAttentionBlock
+::: ml_suite.models.unet.attention
 
 ---
 
-## ConditioningBuilder
+## Conditioning
 
-::: ml_suite.models.unet.conditioning.ConditioningBuilder
+::: ml_suite.models.unet.conditioning
+    options:
+      members: [ConditioningBuilder]

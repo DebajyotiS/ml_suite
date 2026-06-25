@@ -4,36 +4,4 @@
 
 ---
 
-## ConvBlock
-
-::: ml_suite.models.convolution.blocks.ConvBlock
-
----
-
-## ConditionedConvBlock
-
-::: ml_suite.models.convolution.blocks.ConditionedConvBlock
-
----
-
-## SeparableConvBlock
-
-::: ml_suite.models.convolution.blocks.SeparableConvBlock
-
----
-
-## SeparableConditionedConvBlock
-
-::: ml_suite.models.convolution.blocks.SeparableConditionedConvBlock
-
----
-
-## ConvNet
-
-::: ml_suite.models.convolution.blocks.ConvNet
-
----
-
-## ConditionedConvNet
-
-::: ml_suite.models.convolution.blocks.ConditionedConvNet
+::: ml_suite.models.convolution.blocks
