@@ -11,7 +11,7 @@
       
       
       
-        <link rel="prev" href="../../getting-started/">
+        <link rel="prev" href="../../recipes/">
       
       
         <link rel="next" href="../convolution/">
@@ -260,6 +260,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../../recipes/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Recipes
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -382,6 +401,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -415,10 +461,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -436,8 +482,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -788,10 +834,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
             
   
   
@@ -809,8 +855,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1224,6 +1270,8 @@
 <p><code>ml_suite.models.linear</code> provides linear projection blocks and multi-layer perceptrons with optional context conditioning via concatenation, addition, multiplication, FiLM, or cross-attention.</p>
 <hr />
 <h2 id="linear-blocks">Linear blocks</h2>
+<p><code>LinearBlock</code> is the basic unit for MLP-style networks in this library. It wraps a single linear projection and optionally accepts a secondary conditioning tensor. The <code>context_injection</code> parameter controls how that second signal is mixed in. For most conditioning tasks, <code>film</code> is the right choice because it applies a learned scale and shift per feature, which is what diffusion models use to inject time information. Use <code>concat</code> when you want the simplest possible thing and are happy for the network to learn the mixing from scratch.</p>
+<p><strong>Choosing <code>context_injection</code>:</strong> <code>concat</code> appends context to the input before projection, giving the network full control over the mixing. <code>add</code> and <code>multiply</code> are element-wise and useful when context and input are already in the same space. <code>film</code> applies learned scale and shift and is the standard choice for diffusion timestep conditioning. <code>cross_attn</code> applies multi-head attention and requires context to have shape <code>(batch, tokens, dim)</code> rather than <code>(batch, dim)</code>.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -2206,6 +2254,10 @@ Must contain exactly <code>num_layers</code> elements.</p>
 
 </div><hr />
 <h2 id="vad-inference">VAD inference</h2>
+<div class="admonition warning">
+<p class="admonition-title">Not yet implemented</p>
+<p>The classes in this section are experimental placeholders. <code>VADLinearBlock.forward</code> raises <code>NotImplementedError</code>. The API may change before implementation is complete.</p>
+</div>
 
 
 <div class="doc doc-object doc-module">

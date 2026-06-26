@@ -260,6 +260,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../../../recipes/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Recipes
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -382,6 +401,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -415,10 +461,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -436,8 +482,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -564,10 +610,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
             
   
   
@@ -585,8 +631,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2459,7 +2505,7 @@
 
 
 <h1 id="transformer-primitives">Transformer primitives</h1>
-<p>Lower-level building blocks used by the transformer models: attention layers, feed-forward blocks, the transformer stack, tokenizers, positional encodings, heads, decoders, and conditioning utilities.</p>
+<p>These are the low-level components that the model classes in <code>models.transformer</code> are assembled from. You only need to read this page if you are building a non-standard architecture by hand. For everything else, start from the presets or models pages.</p>
 <hr />
 <h2 id="attention">Attention</h2>
 
@@ -4202,9 +4248,7 @@ True = valid token.</p>
 
 </div><hr />
 <h2 id="tokenizers">Tokenizers</h2>
-<blockquote>
-<p><strong>Note on naming:</strong> "Tokenizers" here means the components that convert raw modality inputs into the <code>(B, T, embedding_dim)</code> format the transformer expects — including input projection for continuous features, embedding lookup for discrete IDs, and patch extraction for spatial data. Upstream segmentation (e.g. BPE) is handled outside these classes and is out of scope.</p>
-</blockquote>
+<p>These tokenizers convert raw inputs into the <code>(batch, tokens, embedding_dim)</code> format the transformer expects. Use <code>ContinuousInputTokenizer</code> for float feature vectors. Use <code>PatchTokenizerND</code> for spatial grids. Use <code>DiscreteTokenTokenizer</code> for integer token IDs. <code>SetTokenizer</code> is identical to <code>ContinuousInputTokenizer</code> and exists as a semantic alias for unordered inputs.</p>
 
 
 <div class="doc doc-object doc-module">
@@ -4772,6 +4816,7 @@ True = valid token.</p>
 
 </div><hr />
 <h2 id="positional-encodings">Positional encodings</h2>
+<p>Use <code>SinusoidalPositionalEmbedding</code> for patch transformers and other tasks where you want a fixed encoding that generalizes to unseen sequence lengths. Use <code>LearnedPositionalEmbedding</code> when sequence lengths are fixed and the positions can be learned. Use <code>RotaryEmbedding</code> via the <code>positional_encoding='rope'</code> argument to self-attention when you want position-relative attention without an additive embedding, which is standard for sequence models. Pass <code>positional_encoding='none'</code> for point clouds and other inputs where order does not matter.</p>
 
 
 <div class="doc doc-object doc-module">

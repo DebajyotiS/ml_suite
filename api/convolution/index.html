@@ -260,6 +260,25 @@
   
   
   
+  
+    <li class="md-tabs__item">
+      <a href="../../recipes/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Recipes
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
     
   
   
@@ -382,6 +401,33 @@
       
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../../recipes/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Recipes
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
     
   
   
@@ -415,10 +461,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
             
   
   
@@ -436,8 +482,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -805,10 +851,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
         
           
-          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
             
   
   
@@ -826,8 +872,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_4">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -1255,7 +1301,10 @@
 
 
 <h1 id="convolution-models">Convolution models</h1>
-<p><code>ml_suite.models.convolution</code> provides dimension-agnostic convolutional building blocks (1D, 2D, 3D) and multi-stage backbones, with standard and depthwise-separable variants and optional FiLM conditioning.</p>
+<p><code>ml_suite.models.convolution</code> contains blocks and multi-stage backbones that work identically for 1D signals, 2D images, and 3D volumes. The <code>conv_dim</code> parameter is the only thing that changes between them.</p>
+<p><strong>ConvNet vs UNet.</strong> For classification and feature extraction, use <code>ConvNet</code>. For generation and reconstruction tasks where output spatial size needs to match input size, use <code>ConditionedUNet</code> from <code>models.unet</code>. The U-Net has skip connections that preserve spatial detail through the decoder. The ConvNet is encoder-only.</p>
+<p><strong>ConvNet vs ConditionedConvNet.</strong> Use <code>ConvNet</code> for pure discriminative tasks like classification. Use <code>ConditionedConvNet</code> when you need to inject a global signal, such as a class embedding or a diffusion timestep, into every convolutional layer via FiLM.</p>
+<p><strong>Receptive field diagnostic.</strong> <code>ConvNet</code> exposes a <code>print_receptive_field</code> method. When you are tuning <code>stage_channels</code> and <code>blocks_per_stage</code> and want to know how large a spatial region each output feature represents, call this method. It prints the cumulative receptive field after each layer so you can verify that the field covers your target structure size.</p>
 <hr />
 
 
