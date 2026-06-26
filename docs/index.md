@@ -1,6 +1,8 @@
 # ML Suite
 
-Reusable, dimension-agnostic deep learning building blocks for generative modelling research. Build classifiers, diffusion models, flow-matching networks, and point-cloud models from composable PyTorch primitives that work identically across 1D, 2D, and 3D data.
+You are building a generative model. Your data might be 1D signals today, 2D images tomorrow, and 3D volumes after that. ml_suite gives you one set of building blocks that handles all three without rewriting your architecture code.
+
+ml_suite provides model components only. It has no training loop, no logging, and no data loading. Users who want those should look at Lightning or a similar framework.
 
 ---
 
@@ -107,22 +109,33 @@ Pick the tab that matches your goal. Each one shows the recommended model and a 
 
 ## Module map
 
-| Module | What it provides | Dimensionality |
-|---|---|---|
-| [`models.linear`](api/linear.md) | Linear blocks, MLPs, FiLM / cross-attn conditioning | any |
-| [`models.convolution`](api/convolution.md) | Conv blocks, separable variants, multi-stage backbones | 1D / 2D / 3D |
-| [`models.unet`](api/unet.md) | Encoder-decoder U-Nets with skip connections and rich conditioning | 1D / 2D / 3D |
-| [`models.transformer`](api/transformer/models.md) | Token-centric transformers: classification, generation, patch grids | any |
-| [`models.transformer.presets`](api/transformer/presets.md) | One-call factory functions for common configurations | any |
-| [`utils`](api/utils.md) | Activation factory, sinusoidal / MLP time embeddings | any |
+| Module | What it provides | Dimensionality | Typical use |
+|---|---|---|---|
+| [`models.linear`](api/linear.md) | Linear blocks, MLPs, FiLM / cross-attn conditioning | any | Conditioning blocks and MLP heads |
+| [`models.convolution`](api/convolution.md) | Conv blocks, separable variants, multi-stage backbones | 1D / 2D / 3D | Classifiers on spatial data |
+| [`models.unet`](api/unet.md) | Encoder-decoder U-Nets with skip connections and rich conditioning | 1D / 2D / 3D | Generation and reconstruction |
+| [`models.transformer`](api/transformer/models.md) | Token-centric transformers: classification, generation, patch grids | any | Sequences, point clouds, and patches |
+| [`models.transformer.presets`](api/transformer/presets.md) | One-call factory functions for common configurations | any | Quick model construction for common tasks |
+| [`utils`](api/utils.md) | Activation factory, sinusoidal / MLP time embeddings | any | Time embeddings for diffusion and flow models |
 
 ---
 
 ## Installation
 
-```bash
-uv sync --extra dev   # recommended
-pip install -e ".[dev]"  # pip alternative
-```
+=== "uv (recommended)"
+
+    ```bash
+    git clone https://github.com/DebajyotiS/ml_suite
+    cd ml_suite
+    uv sync --extra dev
+    ```
+
+=== "pip"
+
+    ```bash
+    git clone https://github.com/DebajyotiS/ml_suite
+    cd ml_suite
+    pip install -e ".[dev]"
+    ```
 
 Requires Python >= 3.13 and PyTorch >= 2.12.

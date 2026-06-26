@@ -66,6 +66,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Recipes: recipes.md
   - API Reference:
     - Linear: api/linear.md
     - Convolution: api/convolution.md
