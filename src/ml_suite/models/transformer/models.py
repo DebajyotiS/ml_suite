@@ -35,6 +35,17 @@ class TokenToTokenTransformer(nn.Module):
 
     Output:
         out.shape == (batch, tokens, output_dim)
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.models import TokenToTokenTransformer
+        >>> model = TokenToTokenTransformer(
+        ...     input_dim=32, output_dim=8, embedding_dim=128, depth=4, num_heads=4
+        ... )
+        >>> x = torch.randn(2, 16, 32)  # (batch, tokens, input_dim)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 16, 8])
     """
 
     def __init__(
@@ -110,7 +121,21 @@ class TokenToTokenTransformer(nn.Module):
 
 
 class TokenToVectorTransformer(nn.Module):
-    """Generic token-to-vector transformer."""
+    """Generic token-to-vector transformer.
+
+    Collapses the token sequence to a single vector via pooling.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.models import TokenToVectorTransformer
+        >>> model = TokenToVectorTransformer(
+        ...     input_dim=32, output_dim=64, embedding_dim=128, depth=4, num_heads=4
+        ... )
+        >>> x = torch.randn(2, 16, 32)  # (batch, tokens, input_dim)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 64])
+    """
 
     def __init__(
         self,
@@ -187,7 +212,22 @@ class TokenToVectorTransformer(nn.Module):
 
 
 class TokenToClassTransformer(TokenToVectorTransformer):
-    """Generic token-to-class transformer."""
+    """Generic token-to-class transformer.
+
+    A thin wrapper over TokenToVectorTransformer that names the output dimension
+    ``num_classes`` and validates that it is positive.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.models import TokenToClassTransformer
+        >>> model = TokenToClassTransformer(
+        ...     input_dim=32, num_classes=10, embedding_dim=128, depth=4, num_heads=4
+        ... )
+        >>> x = torch.randn(2, 16, 32)  # (batch, tokens, input_dim)
+        >>> logits = model(x)
+        >>> logits.shape
+        torch.Size([2, 10])
+    """
 
     def __init__(
         self,
@@ -224,7 +264,25 @@ class TokenToClassTransformer(TokenToVectorTransformer):
 
 
 class ConditionedTokenTransformer(nn.Module):
-    """Conditional token-to-token transformer."""
+    """Conditional token-to-token transformer.
+
+    Global conditioning sources (time, class labels, global context) are projected to
+    ``embedding_dim``, summed, and broadcast-added to every token before the transformer
+    stack. For per-token conditioning, use ``cross_attention_dim`` instead.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.models import ConditionedTokenTransformer
+        >>> model = ConditionedTokenTransformer(
+        ...     input_dim=3, output_dim=3, embedding_dim=128, depth=4, num_heads=4,
+        ...     positional_encoding='none', time_conditioning=True
+        ... )
+        >>> x = torch.randn(2, 512, 3)  # (batch, points, xyz)
+        >>> t = torch.rand(2)
+        >>> out = model(x, time=t)
+        >>> out.shape
+        torch.Size([2, 512, 3])
+    """
 
     def __init__(
         self,
@@ -355,7 +413,25 @@ class ConditionedTokenTransformer(nn.Module):
 
 
 class PatchTransformerND(nn.Module):
-    """Transformer over 1D, 2D, or 3D patches."""
+    """Transformer over 1D, 2D, or 3D patches.
+
+    Splits a dense spatial grid into non-overlapping patches, processes them with a
+    transformer stack, and decodes the result. ``output_mode`` controls the output shape:
+    ``'grid'`` restores the original spatial dimensions, ``'vector'`` produces a single
+    pooled vector, and ``'tokens'`` returns the raw patch token sequence.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.models import PatchTransformerND
+        >>> model = PatchTransformerND(
+        ...     input_dim=2, in_channels=3, out_channels=1,
+        ...     patch_size=16, embedding_dim=256, depth=4, num_heads=8
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)  # (batch, channels, H, W)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 1, 64, 64])
+    """
 
     def __init__(
         self,

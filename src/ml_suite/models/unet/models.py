@@ -25,6 +25,18 @@ class UNet(BaseUNet):
 
     Supports optional spatial self-attention. Time, class, global context, and
     cross-attention conditioning are handled by ``ConditionedUNet``.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.unet.models import UNet
+        >>> model = UNet(
+        ...     conv_dim=2, in_channels=3, out_channels=1,
+        ...     stage_channels=[64, 128, 256]
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 1, 64, 64])
     """
 
     def __init__(
@@ -91,6 +103,32 @@ class ConditionedUNet(BaseUNet):
     Global conditioning sources ``time``, ``class_labels``, and ``global_context``
     are combined into one vector and passed to every conditioned convolutional
     block. Token conditioning ``cross_context`` is used only by attention blocks.
+
+    Examples:
+        Time-conditioned flow model:
+
+        >>> import torch
+        >>> from ml_suite.models.unet.models import ConditionedUNet
+        >>> model = ConditionedUNet(
+        ...     conv_dim=2, in_channels=3, out_channels=3,
+        ...     stage_channels=[64, 128, 256], time_conditioning=True
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)
+        >>> t = torch.rand(2)
+        >>> out = model(x, time=t)
+        >>> out.shape
+        torch.Size([2, 3, 64, 64])
+
+        Class-conditional generation:
+
+        >>> model = ConditionedUNet(
+        ...     conv_dim=2, in_channels=3, out_channels=3,
+        ...     stage_channels=[64, 128, 256], time_conditioning=True, num_classes=10
+        ... )
+        >>> y = torch.randint(0, 10, (2,))
+        >>> out = model(x, time=t, class_labels=y)
+        >>> out.shape
+        torch.Size([2, 3, 64, 64])
     """
 
     def __init__(

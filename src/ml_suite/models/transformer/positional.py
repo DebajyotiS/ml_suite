@@ -13,7 +13,17 @@ from .utils import normalize_positional_encoding_mode
 
 
 class LearnedPositionalEmbedding(nn.Module):
-    """Learned absolute positional embedding for token tensors."""
+    """Learned absolute positional embedding for token tensors.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.positional import LearnedPositionalEmbedding
+        >>> pe = LearnedPositionalEmbedding(max_length=512, embedding_dim=128)
+        >>> x = torch.randn(2, 64, 128)  # (batch, tokens, embedding_dim)
+        >>> out = pe(x)
+        >>> out.shape
+        torch.Size([2, 64, 128])
+    """
 
     def __init__(self, max_length: int, embedding_dim: int) -> None:
         super().__init__()
@@ -48,7 +58,17 @@ class LearnedPositionalEmbedding(nn.Module):
 
 
 class SinusoidalPositionalEmbedding(nn.Module):
-    """Fixed absolute sinusoidal positional embedding."""
+    """Fixed absolute sinusoidal positional embedding.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.positional import SinusoidalPositionalEmbedding
+        >>> pe = SinusoidalPositionalEmbedding(embedding_dim=128)
+        >>> x = torch.randn(2, 64, 128)  # (batch, tokens, embedding_dim)
+        >>> out = pe(x)
+        >>> out.shape
+        torch.Size([2, 64, 128])
+    """
 
     def __init__(self, embedding_dim: int, max_length: int | None = None) -> None:
         super().__init__()
@@ -104,7 +124,20 @@ class SinusoidalPositionalEmbedding(nn.Module):
 
 
 class RotaryEmbedding(nn.Module):
-    """Rotary positional embedding cache for attention Q/K tensors."""
+    """Rotary positional embedding cache for attention Q/K tensors.
+
+    Unlike additive embeddings, RoPE is applied inside attention to the Q and K tensors
+    directly. Call this module to get the (cos, sin) rotation matrices, then pass them
+    to the attention layer via the ``positional_encoding='rope'`` path.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.positional import RotaryEmbedding
+        >>> rope = RotaryEmbedding(head_dim=64)
+        >>> cos, sin = rope(seq_len=32, device=torch.device('cpu'), dtype=torch.float32)
+        >>> cos.shape  # (seq_len, head_dim // 2)
+        torch.Size([32, 32])
+    """
 
     def __init__(self, head_dim: int, base: float = 10_000.0) -> None:
         super().__init__()

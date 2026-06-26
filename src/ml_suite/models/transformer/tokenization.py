@@ -12,7 +12,17 @@ from .utils import compute_patch_grid, ensure_tuple
 
 
 class ContinuousInputTokenizer(nn.Module):
-    """Project continuous token features into transformer embedding space."""
+    """Project continuous token features into transformer embedding space.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.tokenization import ContinuousInputTokenizer
+        >>> tokenizer = ContinuousInputTokenizer(input_dim=32, embedding_dim=128)
+        >>> x = torch.randn(4, 16, 32)  # (batch, tokens, features)
+        >>> out = tokenizer(x)
+        >>> out.shape
+        torch.Size([4, 16, 128])
+    """
 
     def __init__(
         self,
@@ -45,11 +55,34 @@ class ContinuousInputTokenizer(nn.Module):
 
 
 class SetTokenizer(ContinuousInputTokenizer):
-    """Tokenizer for unordered set-like inputs."""
+    """Tokenizer for unordered set-like inputs.
+
+    Identical to ContinuousInputTokenizer. The different name signals intent:
+    use this when the input has no meaningful ordering, such as a point cloud.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.tokenization import SetTokenizer
+        >>> tokenizer = SetTokenizer(input_dim=64, embedding_dim=256)
+        >>> points = torch.randn(2, 512, 64)  # (batch, points, features)
+        >>> out = tokenizer(points)
+        >>> out.shape
+        torch.Size([2, 512, 256])
+    """
 
 
 class DiscreteTokenTokenizer(nn.Module):
-    """Embed integer token IDs."""
+    """Embed integer token IDs.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.tokenization import DiscreteTokenTokenizer
+        >>> tokenizer = DiscreteTokenTokenizer(vocab_size=1000, embedding_dim=128)
+        >>> ids = torch.randint(0, 1000, (4, 32))  # (batch, tokens)
+        >>> out = tokenizer(ids)
+        >>> out.shape
+        torch.Size([4, 32, 128])
+    """
 
     def __init__(
         self,
@@ -85,7 +118,21 @@ class DiscreteTokenTokenizer(nn.Module):
 
 
 class PatchTokenizerND(nn.Module):
-    """Patchify 1D, 2D, or 3D grid data into token embeddings."""
+    """Patchify 1D, 2D, or 3D grid data into token embeddings.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.tokenization import PatchTokenizerND
+        >>> tokenizer = PatchTokenizerND(
+        ...     spatial_dim=2, in_channels=3, embedding_dim=256, patch_size=16
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)  # (batch, channels, H, W)
+        >>> tokens, grid_shape = tokenizer(x)
+        >>> tokens.shape   # (batch, num_patches, embedding_dim)
+        torch.Size([2, 16, 256])
+        >>> grid_shape     # patches per spatial dimension
+        (4, 4)
+    """
 
     def __init__(
         self,

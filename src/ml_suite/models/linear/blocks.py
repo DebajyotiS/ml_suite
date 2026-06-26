@@ -35,6 +35,27 @@ class LinearBlock(nn.Module):
     Raises:
         ValueError: If `do_residual` is True but `input_dim` does not equal `output_dim`.
         ValueError: If an unsupported `context_injection` strategy is provided.
+
+    Examples:
+        Basic projection with no conditioning:
+
+        >>> import torch
+        >>> from ml_suite.models.linear.blocks import LinearBlock
+        >>> block = LinearBlock(input_dim=64, output_dim=128)
+        >>> x = torch.randn(4, 64)
+        >>> out = block(x)
+        >>> out.shape
+        torch.Size([4, 128])
+
+        FiLM conditioning (e.g. diffusion timestep injection):
+
+        >>> block = LinearBlock(
+        ...     input_dim=64, output_dim=64, context_dim=32, context_injection='film'
+        ... )
+        >>> ctx = torch.randn(4, 32)
+        >>> out = block(x, ctx)
+        >>> out.shape
+        torch.Size([4, 64])
     """
 
     def __init__(
@@ -170,6 +191,15 @@ class MLP(nn.Module):
         activation_list: Explicit list of activation names for each layer.
             Must contain exactly `num_layers` elements.
         do_residual: If True, blocks with matching input and output sizes use residual connections.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.linear.blocks import MLP
+        >>> mlp = MLP(input_dim=32, hidden_dim=64, num_layers=3)
+        >>> x = torch.randn(8, 32)
+        >>> out = mlp(x)
+        >>> out.shape
+        torch.Size([8, 64])
     """
 
     def __init__(

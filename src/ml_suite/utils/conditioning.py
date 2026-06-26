@@ -13,7 +13,17 @@ TimeEmbeddingType = Literal["sinusoidal", "learned"]
 
 
 class SinusoidalTimeEmbedding(nn.Module):
-    """Map scalar time values of shape (B,) or (B, 1) to sinusoidal embeddings."""
+    """Map scalar time values of shape (B,) or (B, 1) to sinusoidal embeddings.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.utils.conditioning import SinusoidalTimeEmbedding
+        >>> emb = SinusoidalTimeEmbedding(embedding_dim=128)
+        >>> t = torch.rand(4)
+        >>> out = emb(t)
+        >>> out.shape
+        torch.Size([4, 128])
+    """
 
     def __init__(self, embedding_dim: int) -> None:
         super().__init__()
@@ -48,7 +58,20 @@ class SinusoidalTimeEmbedding(nn.Module):
 
 
 class TimeEmbeddingMLP(nn.Module):
-    """Project scalar time values to a target embedding dimension."""
+    """Project scalar time values to a target embedding dimension.
+
+    Applies a sinusoidal embedding followed by a two-layer MLP. This is the standard
+    time conditioning block used in most diffusion and flow-matching models.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.utils.conditioning import TimeEmbeddingMLP
+        >>> emb = TimeEmbeddingMLP(embedding_dim=256)
+        >>> t = torch.rand(4)
+        >>> out = emb(t)
+        >>> out.shape
+        torch.Size([4, 256])
+    """
 
     def __init__(
         self,

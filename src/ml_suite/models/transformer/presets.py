@@ -37,6 +37,17 @@ def make_point_cloud_classifier(
 
     Returns:
         A TokenToClassTransformer configured for point-cloud classification.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_point_cloud_classifier
+        >>> model = make_point_cloud_classifier(
+        ...     point_dim=3, num_classes=40, embedding_dim=128, depth=4, num_heads=4
+        ... )
+        >>> x = torch.randn(2, 512, 3)  # (batch, points, xyz)
+        >>> logits = model(x)
+        >>> logits.shape
+        torch.Size([2, 40])
     """
     return TokenToClassTransformer(
         input_dim=point_dim + feature_dim,
@@ -73,6 +84,17 @@ def make_point_to_point_model(
 
     Returns:
         A TokenToTokenTransformer configured for point-to-point prediction.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_point_to_point_model
+        >>> model = make_point_to_point_model(
+        ...     point_dim=3, output_dim=3, embedding_dim=128, depth=4, num_heads=4
+        ... )
+        >>> x = torch.randn(2, 512, 3)  # (batch, points, xyz)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 512, 3])
     """
     return TokenToTokenTransformer(
         input_dim=point_dim + feature_dim,
@@ -115,6 +137,19 @@ def make_conditioned_point_to_point_model(
 
     Returns:
         A ConditionedTokenTransformer configured for conditioned point-to-point prediction.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_conditioned_point_to_point_model
+        >>> model = make_conditioned_point_to_point_model(
+        ...     point_dim=3, output_dim=3, embedding_dim=128,
+        ...     depth=4, num_heads=4, time_conditioning=True
+        ... )
+        >>> x = torch.randn(2, 512, 3)  # (batch, points, xyz)
+        >>> t = torch.rand(2)
+        >>> velocity = model(x, time=t)
+        >>> velocity.shape
+        torch.Size([2, 512, 3])
     """
     return ConditionedTokenTransformer(
         input_dim=point_dim + feature_dim,
@@ -154,6 +189,18 @@ def make_sequence_classifier(
 
     Returns:
         A TokenToClassTransformer configured for sequence classification with RoPE.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_sequence_classifier
+        >>> model = make_sequence_classifier(
+        ...     input_dim=64, num_classes=10, embedding_dim=128,
+        ...     depth=4, num_heads=4, max_length=512
+        ... )
+        >>> x = torch.randn(2, 128, 64)  # (batch, tokens, features)
+        >>> logits = model(x)
+        >>> logits.shape
+        torch.Size([2, 10])
     """
     return TokenToClassTransformer(
         input_dim=input_dim,
@@ -194,6 +241,18 @@ def make_patch_grid_model(
 
     Returns:
         A PatchTransformerND configured for grid-to-grid prediction.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_patch_grid_model
+        >>> model = make_patch_grid_model(
+        ...     input_dim=2, in_channels=3, out_channels=1,
+        ...     patch_size=16, embedding_dim=256, depth=4, num_heads=8
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)  # (batch, channels, H, W)
+        >>> out = model(x)
+        >>> out.shape
+        torch.Size([2, 1, 64, 64])
     """
     return PatchTransformerND(
         input_dim=input_dim,
@@ -235,6 +294,18 @@ def make_patch_classifier(
 
     Returns:
         A PatchTransformerND configured for patch-based classification.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.presets import make_patch_classifier
+        >>> model = make_patch_classifier(
+        ...     input_dim=2, in_channels=3, num_classes=10,
+        ...     patch_size=16, embedding_dim=256, depth=4, num_heads=8
+        ... )
+        >>> x = torch.randn(2, 3, 64, 64)  # (batch, channels, H, W)
+        >>> logits = model(x)
+        >>> logits.shape
+        torch.Size([2, 10])
     """
     return PatchTransformerND(
         input_dim=input_dim,

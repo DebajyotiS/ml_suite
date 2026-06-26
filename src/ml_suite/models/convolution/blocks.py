@@ -370,7 +370,30 @@ class SeparableConditionedConvBlock(SeparableConvBlock):
 
 
 class ConvNet(nn.Module):
-    """A flexible 1D, 2D, or 3D convolutional backbone or classifier."""
+    """A flexible 1D, 2D, or 3D convolutional backbone or classifier.
+
+    Examples:
+        Feature extractor (no ``num_classes``):
+
+        >>> import torch
+        >>> from ml_suite.models.convolution.blocks import ConvNet
+        >>> model = ConvNet(
+        ...     conv_dim=2, in_channels=3, stage_channels=[64, 128, 256],
+        ...     blocks_per_stage=2
+        ... )
+        >>> x = torch.randn(4, 3, 64, 64)
+        >>> features = model(x)  # (4, 256) — globally pooled feature vector
+
+        Classifier (with ``num_classes``):
+
+        >>> model = ConvNet(
+        ...     conv_dim=2, in_channels=3, stage_channels=[64, 128, 256],
+        ...     blocks_per_stage=2, num_classes=10
+        ... )
+        >>> logits = model(x)
+        >>> logits.shape
+        torch.Size([4, 10])
+    """
 
     def __init__(
         self,

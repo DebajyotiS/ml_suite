@@ -10,7 +10,17 @@ from .types import NormType, PositionalEncodingMode
 
 
 class TransformerStack(nn.Module):
-    """Stack of pre-norm transformer blocks."""
+    """Stack of pre-norm transformer blocks.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.stacks import TransformerStack
+        >>> stack = TransformerStack(embedding_dim=256, depth=4, num_heads=8)
+        >>> x = torch.randn(2, 32, 256)  # (batch, tokens, embedding_dim)
+        >>> out = stack(x)
+        >>> out.shape
+        torch.Size([2, 32, 256])
+    """
 
     def __init__(
         self,

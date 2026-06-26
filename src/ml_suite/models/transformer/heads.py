@@ -70,7 +70,17 @@ def make_head_mlp(
 
 
 class TokenwiseHead(nn.Module):
-    """Map each token independently to an output dimension."""
+    """Map each token independently to an output dimension.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.heads import TokenwiseHead
+        >>> head = TokenwiseHead(embedding_dim=256, output_dim=3)
+        >>> tokens = torch.randn(2, 512, 256)  # (batch, tokens, embedding_dim)
+        >>> out = head(tokens)
+        >>> out.shape
+        torch.Size([2, 512, 3])
+    """
 
     def __init__(
         self,
@@ -104,7 +114,17 @@ class TokenwiseHead(nn.Module):
 
 
 class PooledHead(nn.Module):
-    """Pool tokens and map the pooled vector to an output dimension."""
+    """Pool tokens and map the pooled vector to an output dimension.
+
+    Examples:
+        >>> import torch
+        >>> from ml_suite.models.transformer.heads import PooledHead
+        >>> head = PooledHead(embedding_dim=256, output_dim=10)
+        >>> tokens = torch.randn(2, 32, 256)  # (batch, tokens, embedding_dim)
+        >>> out = head(tokens)
+        >>> out.shape
+        torch.Size([2, 10])
+    """
 
     def __init__(
         self,
