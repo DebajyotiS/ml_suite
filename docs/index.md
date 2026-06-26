@@ -1,8 +1,8 @@
 # ML Suite
 
-You are building a generative model. Your data might be 1D signals today, 2D images tomorrow, and 3D volumes after that. ml_suite gives you one set of building blocks that handles all three without rewriting your architecture code.
+You have a cool ML project idea. Your data might be 1D signals today, 2D images tomorrow, and 3D volumes after that. `ml_suite` gives you one set of building blocks that handles all three without rewriting your architecture code.
 
-ml_suite provides model components only. It has no training loop, no logging, and no data loading. Users who want those should look at Lightning or a similar framework.
+`ml_suite` provides model components only. It has no training loop, no logging, and no data loading. Users who want those should look at Lightning or a similar framework.
 
 ---
 
